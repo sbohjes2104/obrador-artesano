@@ -1,0 +1,32 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: obrador_db
+      MYSQL_USER: obrador_user
+      MYSQL_PASSWORD: obrador_password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app:Z
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_NAME=obrador_db
+      - DB_USER=obrador_user
+      - DB_PASSWORD=obrador_password
+      - DB_HOST=db
+      - DB_PORT=3306
+    depends_on:
+      - db
+
+volumes:
+  db_data:

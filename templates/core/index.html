@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <img src="{% static 'images/hero_bread.jpg' %}" alt="Panes artesanales" class="hero-img">
+    <div class="hero-overlay">
+        <h1>Artesanía en cada bocado</h1>
+        <a href="#encargo" class="btn-pill">Haz tu encargo</a>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section id="categorias">
+    <h2 class="section-title">Nuestras Categorías</h2>
+    <div class="categories-grid">
+        <div class="category-card">
+            <img src="{% static 'images/cat_bread.jpg' %}" alt="Nuestros panes" class="category-img">
+            <h3>Nuestros panes</h3>
+            <a href="#" class="btn-pill">Ver más</a>
+        </div>
+        <div class="category-card">
+            <img src="{% static 'images/cat_pastry.jpg' %}" alt="Nuestra bollería" class="category-img">
+            <h3>Nuestra bollería</h3>
+            <a href="#" class="btn-pill">Ver más</a>
+        </div>
+        <div class="category-card">
+            <img src="{% static 'images/cat_cake.jpg' %}" alt="Nuestras tartas" class="category-img">
+            <h3>Nuestras tartas</h3>
+            <a href="#" class="btn-pill">Ver más</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
