@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<script>
+    document.body.classList.add('shop-page');
+</script>
+<div class="shop-container">
+    <aside class="shop-sidebar" id="filter-sidebar">
+        <div class="sidebar-header">
+            <a href="#" class="close-sidebar" id="close-sidebar">&times;</a>
+            <h2>Filtrar</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="{% url 'shop:producto_list' %}" class="{% if not category_selected %}active{% endif %}">Todos</a></li>
+                {% for cat in categorias %}
+                <li>
+                    <a href="{% url 'shop:producto_list' %}?category={{ cat.nombre }}" 
+                       class="{% if category_selected == cat.nombre %}active{% endif %}">
+                        {{ cat.nombre }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="shop-content">
+        <button id="open-sidebar" class="sidebar-toggle-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+        {% if category_selected %}
+            <h1 class="section-title">{{ category_selected }}</h1>
+            <div class="products-grid">
+                {% for producto in productos %}
+                <div class="product-card">
+                    <div class="product-img-wrapper">
+                        {% if producto.imagen_url %}
+                            <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="product-img">
+                        {% elif producto.imagen %}
+                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="product-img">
+                        {% else %}
+                            <img src="{% static 'images/cat_bread.jpg' %}" alt="{{ producto.nombre }}" class="product-img">
+                        {% endif %}
+                    </div>
+                    <div class="product-info">
+                        <h3>{{ producto.nombre }}</h3>
+                        <p class="product-price">{{ producto.precio|floatformat:2 }} €</p>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No hay productos disponibles en esta categoría.</p>
+                {% endfor %}
+            </div>
+        {% else %}
+            <h1 class="section-title">Nuestros productos</h1>
+            {% for section in grouped_products %}
+            <section class="category-section" id="section-{{ section.categoria.id }}">
+                <h2 class="category-header">{{ section.categoria.nombre }}</h2>
+                <div class="products-grid">
+                    {% for producto in section.productos %}
+                    <div class="product-card">
+                        <div class="product-img-wrapper">
+                            {% if producto.imagen_url %}
+                                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="product-img">
+                            {% elif producto.imagen %}
+                                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="product-img">
+                            {% else %}
+                                <img src="{% static 'images/cat_bread.jpg' %}" alt="{{ producto.nombre }}" class="product-img">
+                            {% endif %}
+                        </div>
+                        <div class="product-info">
+                            <h3>{{ producto.nombre }}</h3>
+                            <p class="product-price">{{ producto.precio|floatformat:2 }} €</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endfor %}
+        {% endif %}
+    </main>
+</div>
+
+<script>
+    // Initial state: Sidebar open on desktop
+    if (window.innerWidth >= 992) {
+        document.getElementById('filter-sidebar').classList.add('open');
+    }
+
+    document.getElementById('close-sidebar').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('filter-sidebar').classList.remove('open');
+    });
+
+    document.getElementById('open-sidebar').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('filter-sidebar').classList.add('open');
+    });
+</script>
+{% endblock %}

@@ -4,34 +4,43 @@
 {% block title %}Crear Cuenta - Obrador Artesano{% endblock %}
 
 {% block content %}
-<section class="form-container">
-    <h2 class="form-title">Crear Cuenta</h2>
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="nombre">Nombre</label>
-            <input type="text" name="nombre" id="nombre" class="form-input" placeholder="Tu nombre completo" required>
+<section class="auth-page-container">
+    <div class="auth-wrapper">
+        <div class="auth-logo">
+            <img src="{% static 'images/logo.png' %}" alt="Obrador Logo">
         </div>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" name="email" id="email" class="form-input" placeholder="ejemplo@correo.com" required>
+
+        <h2 class="auth-title">Crear Cuenta</h2>
+
+        <div class="auth-card">
+            <form method="post">
+                {% csrf_token %}
+                <div class="auth-form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" name="nombre" id="nombre" class="auth-form-input" placeholder="Tu nombre completo" required>
+                </div>
+                <div class="auth-form-group">
+                    <label for="email">Email</label>
+                    <input type="email" name="email" id="email" class="auth-form-input" placeholder="Introduce tu correo electrónico" required>
+                </div>
+                <div class="auth-form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" name="password" id="password" class="auth-form-input" placeholder="Escribe tu contraseña" required>
+                </div>
+                <div class="auth-form-group">
+                    <label for="password_confirm">Repetir Contraseña</label>
+                    <input type="password" name="password_confirm" id="password_confirm" class="auth-form-input" placeholder="Repite tu contraseña" required>
+                </div>
+                
+                <div class="auth-btn-container">
+                    <button type="submit" class="auth-btn">Registrarse</button>
+                </div>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="password">Contraseña</label>
-            <input type="password" name="password" id="password" class="form-input" placeholder="••••••••" required>
+
+        <div class="auth-footer">
+            <p>¿Ya tienes cuenta? <a href="{% url 'login' %}">Iniciar sesión</a></p>
         </div>
-        <div class="form-group">
-            <label for="password_confirm">Repetir Contraseña</label>
-            <input type="password" name="password_confirm" id="password_confirm" class="form-input" placeholder="••••••••" required>
-        </div>
-        
-        <div style="text-align: center; margin-top: 2rem;">
-            <button type="submit" class="btn-pill">Registrarse</button>
-        </div>
-        
-        <div style="text-align: center; margin-top: 1.5rem;">
-            <p>¿Ya tienes cuenta? <a href="{% url 'login' %}" style="color: var(--primary-dark); font-weight: bold;">Iniciar sesión</a></p>
-        </div>
-    </form>
+    </div>
 </section>
 {% endblock %}
