@@ -3,11 +3,11 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero">
-    <img src="{% static 'images/hero_bread.jpg' %}" alt="Panes artesanales" class="hero-img">
-    <div class="hero-overlay">
-        <h1>Artesanía en cada bocado</h1>
-        <a href="#encargo" class="btn-pill">Haz tu encargo</a>
+<section class="hero-container">
+    <h1 class="main-title">Artesanía en cada bocado</h1>
+    <div class="hero-image-wrapper">
+        <img src="{% static 'images/hero_bread.jpg' %}" alt="Panes artesanales" class="hero-img">
+        <a href="#categorias" class="btn-hero">Haz tu encargo</a>
     </div>
 </section>
 
@@ -16,20 +16,26 @@
     <h2 class="section-title">Nuestras Categorías</h2>
     <div class="categories-grid">
         <div class="category-card">
-            <img src="{% static 'images/cat_bread.jpg' %}" alt="Nuestros panes" class="category-img">
-            <h3>Nuestros panes</h3>
-            <a href="#" class="btn-pill">Ver más</a>
+            <img src="{% static 'images/cat_bread.jpg' %}" alt="Panes artesanales" class="category-img">
+            <div class="category-info">
+                <h3>Panes</h3>
+            <a href="{% url 'shop:producto_list' %}?category=Panadería Tradicional" class="btn-dark">Haz tu pedido</a>
         </div>
-        <div class="category-card">
-            <img src="{% static 'images/cat_pastry.jpg' %}" alt="Nuestra bollería" class="category-img">
-            <h3>Nuestra bollería</h3>
-            <a href="#" class="btn-pill">Ver más</a>
+    </div>
+    <div class="category-card">
+        <img src="{% static 'images/cat_bolleria.jpg' %}" alt="Bollería artesanal" class="category-img">
+        <div class="category-info">
+            <h3>Bollería</h3>
+            <a href="{% url 'shop:producto_list' %}?category=Bollería Dulce" class="btn-dark">Haz tu pedido</a>
         </div>
-        <div class="category-card">
-            <img src="{% static 'images/cat_cake.jpg' %}" alt="Nuestras tartas" class="category-img">
-            <h3>Nuestras tartas</h3>
-            <a href="#" class="btn-pill">Ver más</a>
+    </div>
+    <div class="category-card">
+        <img src="{% static 'images/cat_tartas.jpg' %}" alt="Tartas artesanales" class="category-img">
+        <div class="category-info">
+            <h3>Tartas</h3>
+            <a href="{% url 'shop:producto_list' %}?category=Pastelería y Tartas" class="btn-dark">Haz tu pedido</a>
         </div>
+    </div>
     </div>
 </section>
 {% endblock %}

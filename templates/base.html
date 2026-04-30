@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Artesanía en cada bocado{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9.9.8">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -16,15 +16,35 @@
                 <img src="{% static 'images/logo.png' %}" alt="Obrador Logo">
             </a>
         </div>
+        <div class="nav-center">
+            <nav class="nav-links">
+                <a href="{% url 'home' %}">Inicio</a>
+                <a href="{% url 'shop:producto_list' %}">Tienda</a>
+                <a href="#">Contacto</a>
+            </nav>
+        </div>
         <div class="nav-right">
             <a href="#" class="icon-badge">
-                <i class="fas fa-shopping-cart fa-lg"></i>
+                <img src="{% static 'images/iconoCarrito.png' %}" alt="Carrito">
                 <span class="badge">0</span>
             </a>
-            <a href="{% url 'login' %}">
-                <i class="fas fa-user fa-lg"></i>
-            </a>
-            <a href="#">
+            <div class="user-dropdown" id="user-dropdown">
+                <a href="#" id="user-icon">
+                    <img src="{% static 'images/iconoUsuario.png' %}" alt="Usuario">
+                </a>
+                <div class="dropdown-content">
+                    <div class="dropdown-header">
+                        <h3>Mi perfil</h3>
+                    </div>
+                    <ul class="dropdown-links">
+                        <li><a href="#">Mi cuenta</a></li>
+                        <li><a href="{% url 'login' %}">iniciar sesión</a></li>
+                        <li><a href="{% url 'register' %}">Crear cuenta</a></li>
+                        <li><a href="#">Mi carrito</a></li>
+                    </ul>
+                </div>
+            </div>
+            <a href="#" class="burger-menu">
                 <i class="fas fa-bars fa-lg"></i>
             </a>
         </div>
@@ -34,16 +54,41 @@
         {% block content %}{% endblock %}
     </main>
 
+    <script>
+        document.getElementById('user-icon').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('user-dropdown').classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('user-dropdown');
+            const icon = document.getElementById('user-icon');
+            if (dropdown && icon && !dropdown.contains(e.target) && !icon.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Burger menu toggles sidebar on shop page
+        document.querySelector('.burger-menu').addEventListener('click', function(e) {
+            e.preventDefault();
+            const sidebar = document.getElementById('filter-sidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('open');
+            }
+        });
+    </script>
+
     <footer class="footer">
         <div class="footer-content">
             <p>&copy; 2026 Obrador Artesano</p>
             <div class="footer-logo">
-                <img src="{% static 'images/logo.png' %}" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                <img src="{% static 'images/logo.png' %}" alt="Logo">
             </div>
             <div class="social-icons">
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
-                <a href="#"><i class="fab fa-whatsapp"></i></a>
+                <a href="#"><img src="{% static 'images/twtIcon.png' %}" alt="Twitter"></a>
+                <a href="#"><img src="{% static 'images/igIcon.png' %}" alt="Instagram"></a>
+                <a href="#"><img src="{% static 'images/whatsappIcon.png' %}" alt="WhatsApp"></a>
             </div>
         </div>
     </footer>
