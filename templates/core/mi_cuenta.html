@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .account-wrapper {
+        min-height: calc(100vh - 150px);
+        background-color: #f6f5e9; /* Light beige matching the design */
+        padding: 4rem 2rem;
+    }
+    .account-title {
+        font-family: 'Playfair Display', serif;
+        color: #4a3b32;
+        max-width: 1000px;
+        margin: 0 auto 2rem auto;
+        font-size: 2rem;
+    }
+    .account-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .account-box {
+        background-color: #e6c5a8;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        color: #4a3b32;
+    }
+
+    .account-box h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8rem;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    .user-details p {
+        font-size: 1.1rem;
+        margin: 0.5rem 0;
+    }
+
+    /* Tabla de pedidos */
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+        font-size: 1rem;
+    }
+    .orders-table th {
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(74, 59, 50, 0.2);
+    }
+    .orders-table td {
+        padding: 1rem 0;
+    }
+    .orders-table tr:not(:last-child) td {
+        border-bottom: 1px solid rgba(74, 59, 50, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .table-responsive {
+            overflow-x: auto;
+        }
+        .account-wrapper {
+            padding: 2rem 1rem;
+        }
+        .account-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+        .account-box {
+            padding: 1.5rem;
+        }
+        .account-box h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+        .user-details p {
+            font-size: 0.9rem;
+            margin: 0.8rem 0;
+        }
+        .orders-table {
+            font-size: 0.75rem;
+        }
+        .orders-table th {
+            padding-bottom: 0.5rem;
+        }
+        .orders-table td {
+            padding: 0.5rem 0;
+        }
+    }
+</style>
+
+<div class="account-wrapper">
+    <h1 class="account-title">Mi Cuenta</h1>
+    
+    <div class="account-container">
+        
+        <!-- Mis Datos -->
+        <div class="account-box">
+            <h2>Mis Datos</h2>
+            <div class="user-details">
+                <p><strong>Nombre:</strong> 
+                    {% if request.user.get_full_name %}
+                        {{ request.user.get_full_name }}
+                    {% else %}
+                        {{ request.user.username }}
+                    {% endif %}
+                </p>
+                <p><strong>Correo electrónico:</strong> {{ request.user.email }}</p>
+            </div>
+        </div>
+
+        <!-- Historial de Pedidos -->
+        <div class="account-box">
+            <h2>Historial de Pedidos</h2>
+            
+            {% if pedidos %}
+            <div class="table-responsive">
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Nº Pedido</th>
+                            <th>Fecha</th>
+                            <th>Recogida</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos %}
+                        <tr>
+                            <td>Pedido #{{ pedido.id|stringformat:"03d" }}</td>
+                            <td>{{ pedido.fecha|date:"d/m/Y" }}</td>
+                            <td>{{ pedido.dia_recogida|default:"Hoy" }}</td>
+                            <td>{{ pedido.total|floatformat:2 }} €</td>
+                            <td>{{ pedido.get_estado_display }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>Aún no has realizado ningún pedido.</p>
+            {% endif %}
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

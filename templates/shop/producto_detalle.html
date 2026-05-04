@@ -1,0 +1,317 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .product-detail-wrapper {
+        min-height: calc(100vh - 150px);
+        background-color: #f6f5e9; /* Light beige matching the design */
+        padding: 4rem 2rem;
+    }
+    .product-detail-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: start;
+    }
+    
+    .product-detail-left {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+    
+    .product-detail-img {
+        width: 100%;
+        border-radius: 8px;
+        object-fit: cover;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .allergens-section h3 {
+        font-family: 'Playfair Display', serif;
+        color: #4a3b32;
+        margin-bottom: 1rem;
+        font-size: 1.8rem;
+    }
+    
+    .allergens-icons {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .allergen-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .allergen-icon {
+        width: 50px;
+        height: 50px;
+        background-color: #c77b4d; /* Rust/orange color matching the design */
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        transition: transform 0.2s ease;
+    }
+    
+    .allergen-icon:hover {
+        transform: scale(1.1);
+    }
+    
+    .allergen-name {
+        font-size: 0.85rem;
+        color: #4a3b32;
+        font-weight: 600;
+    }
+    
+    .product-detail-right {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .product-detail-right h1 {
+        font-family: 'Playfair Display', serif;
+        color: #4a3b32;
+        font-size: 2.5rem;
+        margin: 0;
+    }
+    
+    .product-detail-price {
+        font-size: 1.25rem;
+        color: #4a3b32;
+        margin: 0;
+    }
+    
+    .quantity-selector {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .quantity-selector label {
+        color: #4a3b32;
+        font-size: 0.9rem;
+    }
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        background-color: #dcb38f;
+        width: max-content;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .quantity-btn {
+        background: none;
+        border: none;
+        padding: 0.5rem 1rem;
+        font-size: 1.2rem;
+        color: #4a3b32;
+        cursor: pointer;
+    }
+    .quantity-input {
+        background: none;
+        border: none;
+        width: 2rem;
+        text-align: center;
+        font-size: 1rem;
+        color: #4a3b32;
+        font-weight: bold;
+    }
+    /* Hide arrows on number input */
+    .quantity-input::-webkit-outer-spin-button,
+    .quantity-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    .quantity-input[type=number] {
+        -moz-appearance: textfield;
+    }
+    
+    .product-description {
+        color: #4a3b32;
+        line-height: 1.6;
+        font-size: 0.95rem;
+        white-space: pre-line;
+    }
+    
+    .btn-add-cart {
+        background-color: #dbb48f;
+        color: #4a3b32;
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        font-weight: bold;
+        width: max-content;
+        margin-top: 1rem;
+        transition: background-color 0.3s;
+    }
+    .btn-add-cart:hover {
+        background-color: #cc9f76;
+    }
+    
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #4a3b32;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.1rem;
+        transition: color 0.3s ease;
+    }
+    .btn-back:hover {
+        color: #c77b4d;
+    }
+    
+    @media (max-width: 768px) {
+        .product-detail-wrapper {
+            padding: 2rem 1rem;
+        }
+        .product-detail-container {
+            grid-template-columns: 42% 1fr;
+            gap: 1rem;
+        }
+        .product-detail-left {
+            gap: 1rem;
+        }
+        .allergens-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .allergen-icon {
+            width: 30px;
+            height: 30px;
+            font-size: 0.9rem;
+        }
+        .allergen-name {
+            display: none;
+        }
+        .product-detail-right {
+            gap: 0.8rem;
+        }
+        .product-detail-right h1 {
+            font-size: 1.3rem;
+        }
+        .product-detail-price {
+            font-size: 1rem;
+        }
+        .quantity-selector label {
+            font-size: 0.8rem;
+        }
+        .quantity-btn {
+            padding: 0.2rem 0.6rem;
+            font-size: 1rem;
+        }
+        .quantity-input {
+            width: 1.5rem;
+            font-size: 0.9rem;
+        }
+        .product-description {
+            font-size: 0.75rem;
+            line-height: 1.4;
+        }
+        .btn-add-cart {
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+    }
+</style>
+
+<div class="product-detail-wrapper">
+    
+    {% if messages %}
+    <div id="toast-container" style="position:fixed;top:90px;right:2rem;z-index:9999;display:flex;flex-direction:column;gap:0.8rem;">
+        {% for message in messages %}
+        <div class="toast-msg" style="background-color:#3D2B1F;color:#F5F5DC;padding:1rem 1.5rem;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.25);font-size:1rem;max-width:350px;opacity:1;transition:opacity 0.5s;">
+            <span style="margin-right:0.8rem;">&#x2713;</span>{{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    <script>
+        setTimeout(function() {
+            document.querySelectorAll('.toast-msg').forEach(function(el) {
+                el.style.opacity = '0';
+                setTimeout(function() { el.remove(); }, 500);
+            });
+        }, 3000);
+    </script>
+    {% endif %}
+    
+    <div style="max-width: 1000px; margin: 0 auto 2rem auto;">
+        <a href="{% url 'shop:producto_list' %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Volver a la tienda
+        </a>
+    </div>
+    <div class="product-detail-container">
+        <!-- Izquierda: Imagen y Alérgenos -->
+        <div class="product-detail-left">
+            {% if producto.imagen_url %}
+                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="product-detail-img">
+            {% elif producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="product-detail-img">
+            {% else %}
+                <img src="{% static 'images/cat_bread.jpg' %}" alt="{{ producto.nombre }}" class="product-detail-img">
+            {% endif %}
+            
+            {% if producto.alergenos.all %}
+            <div class="allergens-section">
+                <h3>Alérgenos</h3>
+                <div class="allergens-icons">
+                    {% for alergeno in producto.alergenos.all %}
+                        <div class="allergen-item">
+                            <div class="allergen-icon" title="{{ alergeno.nombre }}">
+                                {% if alergeno.icono %}
+                                    <i class="{{ alergeno.icono }}"></i>
+                                {% else %}
+                                    <span>{{ alergeno.nombre|slice:":1"|upper }}</span>
+                                {% endif %}
+                            </div>
+                            <span class="allergen-name">{{ alergeno.nombre }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Derecha: Info del Producto -->
+        <div class="product-detail-right">
+            <h1>{{ producto.nombre }}</h1>
+            <p class="product-detail-price">{{ producto.precio|floatformat:2 }} €</p>
+            
+            <form action="{% url 'shop:add_carrito' producto.id %}" method="POST">
+                {% csrf_token %}
+                <div class="quantity-selector">
+                    <label>Cantidad</label>
+                    <div class="quantity-controls">
+                        <button type="button" class="quantity-btn" onclick="document.getElementById('qty').stepDown()">-</button>
+                        <input type="number" id="qty" name="cantidad" class="quantity-input" value="1" min="1" max="50">
+                        <button type="button" class="quantity-btn" onclick="document.getElementById('qty').stepUp()">+</button>
+                    </div>
+                </div>
+                
+                <div class="product-description">
+                    {{ producto.descripcion }}
+                    {% if not producto.descripcion %}
+                    Elaborado con los mejores ingredientes para garantizar el mejor sabor en cada bocado.
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="btn-add-cart">Añadir al carrito</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -7,7 +7,7 @@
     <h1 class="main-title">Artesanía en cada bocado</h1>
     <div class="hero-image-wrapper">
         <img src="{% static 'images/hero_bread.jpg' %}" alt="Panes artesanales" class="hero-img">
-        <a href="#categorias" class="btn-hero">Haz tu encargo</a>
+        <a href="{% url 'shop:producto_list' %}" class="btn-hero">Haz tu encargo</a>
     </div>
 </section>
 

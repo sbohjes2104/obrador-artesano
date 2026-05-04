@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .contact-wrapper {
+        min-height: calc(100vh - 150px);
+        background-color: #f6f5e9; /* Light beige matching the design */
+        padding: 4rem 2rem;
+    }
+    .contact-container {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+    .contact-box {
+        background-color: #e6c5a8;
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        color: #4a3b32;
+        text-align: center; /* Alineación central según la imagen */
+    }
+    
+    .contact-box h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        margin-top: 0;
+        margin-bottom: 2rem;
+    }
+
+    /* Caja de info estática */
+    .contact-info {
+        text-align: left;
+        max-width: 500px;
+        margin: 0 auto;
+        font-family: 'Inter', sans-serif;
+        line-height: 1.6;
+        font-size: 1.05rem;
+    }
+    .contact-info p {
+        margin-bottom: 1rem;
+    }
+    .contact-info ul {
+        list-style-type: disc;
+        margin-top: 0.5rem;
+        margin-left: 1.5rem;
+        padding: 0;
+    }
+    .contact-info li {
+        margin-bottom: 0.5rem;
+    }
+
+    /* Caja del formulario */
+    .contact-form {
+        text-align: left;
+        max-width: 500px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .form-group label {
+        font-weight: 500;
+        color: #4a3b32;
+    }
+    .form-group input, 
+    .form-group textarea {
+        padding: 0.8rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        background-color: white;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        color: #333;
+    }
+    .form-group input:focus, 
+    .form-group textarea:focus {
+        outline: 2px solid #a47653;
+    }
+    .form-group textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+    
+    .btn-submit {
+        background-color: #c4966d;
+        color: #4a3b32;
+        border: none;
+        padding: 0.8rem 2.5rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+        margin: 0 auto;
+        display: inline-block;
+    }
+    .btn-submit:hover {
+        background-color: #b08159;
+    }
+
+    .alert {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        text-align: center;
+        border: 1px solid #c3e6cb;
+    }
+    
+    @media (max-width: 768px) {
+        .contact-wrapper {
+            padding: 2rem 1rem;
+        }
+        .contact-box {
+            padding: 1.5rem;
+        }
+        .contact-box h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .contact-info {
+            font-size: 0.9rem;
+        }
+        .form-group label {
+            font-size: 0.9rem;
+        }
+        .form-group input, .form-group textarea {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.9rem;
+        }
+        .btn-submit {
+            padding: 0.6rem 2rem;
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="contact-wrapper">
+    <div class="contact-container">
+        <!-- Notificaciones de éxito simulado -->
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Bloque de Información -->
+        <div class="contact-box">
+            <h2>Contacto</h2>
+            <div class="contact-info">
+                <p>Dirección: Calle Larga, 45, 11403 Jerez de la Frontera.</p>
+                <p>Teléfono: 623 43 56 28</p>
+                <p>Email: info@obradorartesano.es</p>
+                <p>Horarios:</p>
+                <ul>
+                    <li>Lunes a Viernes: 07:00 - 14:30 | 17:00 - 20:30</li>
+                    <li>Sábados y Domingos: 08:00 - 14:00</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Bloque del Formulario -->
+        <div class="contact-box">
+            <h2>Formulario de contacto</h2>
+            <form action="{% url 'contacto' %}" method="POST" class="contact-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Introduce tu nombre" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email" id="email" name="email" placeholder="Introduce tu correo electrónico" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="asunto">Asunto</label>
+                    <input type="text" id="asunto" name="asunto" placeholder="Escribe el motivo de tu consulta" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mensaje">Mensaje</label>
+                    <textarea id="mensaje" name="mensaje" placeholder="Cuéntanos en qué podemos ayudarte" required></textarea>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button type="submit" class="btn-submit">Enviar</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
