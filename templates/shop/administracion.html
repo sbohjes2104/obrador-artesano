@@ -1,0 +1,602 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .admin-wrapper {
+        min-height: calc(100vh - 150px);
+        background-color: #f6f5e9; /* Light beige matching the design */
+        padding: 4rem 2rem;
+    }
+    .admin-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .admin-box {
+        background-color: #e6c5a8;
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        color: #4a3b32;
+        text-align: center; /* Alineación central según la imagen */
+    }
+    
+    .admin-box h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        margin-top: 0;
+        margin-bottom: 2rem;
+    }
+    
+    .resumen-texto {
+        font-family: 'Inter', sans-serif;
+        font-size: 1.1rem;
+    }
+
+    /* Tabla de pedidos admin */
+    .admin-orders-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+        font-size: 1rem;
+    }
+    .admin-orders-table th {
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(74, 59, 50, 0.2);
+    }
+    .admin-orders-table td {
+        padding: 1rem 0;
+        vertical-align: middle;
+    }
+    .admin-orders-table tr:not(:last-child) td {
+        border-bottom: 1px solid rgba(74, 59, 50, 0.1);
+    }
+
+    .custom-status-btn {
+        background-color: rgba(255,255,255,0.7);
+        color: #4a3b32;
+        padding: 0.4rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        font-family: 'Inter', sans-serif;
+    }
+    .custom-status-btn:hover {
+        background-color: white;
+        outline: 2px solid #a47653;
+    }
+
+    .btn-detalle {
+        background-color: #c4966d;
+        color: #4a3b32;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+        display: inline-block;
+    }
+    .btn-detalle:hover {
+        background-color: #b08159;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    .modal-content {
+        background-color: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        color: #4a3b32;
+        position: relative;
+    }
+    .modal-content h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8rem;
+        margin-top: 0;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .modal-section {
+        margin-bottom: 2rem;
+    }
+    .modal-section h3 {
+        font-size: 1.1rem;
+        border-bottom: 1px solid rgba(74, 59, 50, 0.1);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+    .modal-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        text-align: left;
+    }
+    .modal-field label {
+        display: block;
+        font-size: 0.85rem;
+        color: #8c7a6e;
+        margin-bottom: 0.2rem;
+    }
+    .modal-field span {
+        font-weight: 500;
+    }
+    .modal-products-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .modal-product-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.6rem;
+        font-size: 0.95rem;
+    }
+    .modal-total {
+        margin-top: 1rem;
+        border-top: 2px solid #f6f5e9;
+        padding-top: 1rem;
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    .btn-modal {
+        flex: 1;
+        padding: 0.8rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+        transition: opacity 0.3s;
+    }
+    .btn-modal-primary {
+        background-color: #c4966d;
+        color: white;
+    }
+    .btn-modal-secondary {
+        background-color: #e6c5a8;
+        color: #4a3b32;
+    }
+    .close-modal {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #8c7a6e;
+    }
+    
+    /* Overlay Cambio de Estado */
+    .status-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 2000;
+        justify-content: center;
+        align-items: flex-end; 
+    }
+    .status-dialog {
+        background-color: #f6f5e9;
+        width: 100%;
+        max-width: 400px;
+        border-radius: 16px 16px 0 0;
+        padding: 1.5rem;
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+        text-align: center;
+        animation: slideUp 0.3s ease-out;
+    }
+    @keyframes slideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+    }
+    .status-dialog h3 {
+        font-family: 'Playfair Display', serif;
+        color: #4a3b32;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.3rem;
+    }
+    .status-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    .status-list-btn {
+        background-color: white;
+        border: 1px solid #dcb38f;
+        padding: 0.8rem;
+        border-radius: 8px;
+        color: #4a3b32;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .status-list-btn:hover {
+        background-color: #dcb38f;
+    }
+    @media (min-width: 768px) {
+        .status-overlay {
+            align-items: center;
+        }
+        .status-dialog {
+            border-radius: 16px;
+            animation: fadeIn 0.2s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    }
+
+
+    @media (max-width: 768px) {
+        .admin-wrapper {
+            padding: 1.5rem 0.2rem;
+            width: 100%;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+        .admin-container {
+            width: 100%;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+        .admin-box {
+            padding: 1rem 0.2rem;
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .admin-orders-table {
+            font-size: 0.65rem;
+        }
+        .admin-box h2 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+        .resumen-texto {
+            font-size: 0.85rem;
+        }
+        .admin-orders-table th, .admin-orders-table td {
+            padding: 0.4rem 0.1rem;
+            word-wrap: break-word;
+        }
+        .admin-orders-table th {
+            font-size: 0.65rem;
+        }
+        .custom-status-btn {
+            font-size: 0.65rem;
+            padding: 0.3rem 0.4rem;
+            max-width: 95px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .btn-detalle {
+            padding: 0.4rem;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .btn-text-desktop { display: none; }
+        .btn-icon-mobile { display: block !important; font-size: 0.8rem; }
+        .modal-content {
+            padding: 1.5rem 1rem;
+            width: 95%;
+        }
+        .modal-content h3 {
+            font-size: 1.1rem;
+            text-align: center;
+            border: none;
+            margin-bottom: 0.8rem;
+        }
+        .modal-grid {
+            gap: 0.8rem;
+        }
+        .modal-field label {
+            font-size: 0.75rem;
+        }
+        .modal-field span {
+            font-size: 0.8rem;
+            word-break: break-all;
+        }
+        .btn-modal {
+            padding: 0.6rem;
+            font-size: 0.8rem;
+        }
+        .close-modal {
+            display: none !important;
+        }
+    }
+
+    /* Print Optimizations */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #order-modal, #order-modal * {
+            visibility: visible;
+        }
+        #order-modal {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            display: flex !important;
+            background: none;
+        }
+        .modal-content {
+            box-shadow: none;
+            border: 1px solid #eee;
+            width: 100%;
+            max-width: 100%;
+            padding: 0;
+        }
+        .modal-actions, .close-modal {
+            display: none !important;
+        }
+        .admin-wrapper, footer, header {
+            display: none !important;
+        }
+    }
+</style>
+
+<div class="admin-wrapper">
+    <div class="admin-container">
+        <!-- Acceso rápido al admin de Django -->
+        <div style="text-align: right;">
+            <a href="/admin/" target="_blank" class="btn-detalle" style="background-color: #5a3d2b; color: #f6f5e9; padding: 0.5rem 1.2rem; border-radius: 8px; text-decoration: none; font-size: 0.95rem;">
+                <i class="fas fa-cog"></i> Panel Django Admin
+            </a>
+        </div>
+
+        <!-- Resumen de Producción -->
+        <div class="admin-box">
+            <h2>Resumen de Producción</h2>
+            <div class="resumen-texto">
+                <p>{{ resumen_texto }}</p>
+            </div>
+        </div>
+
+        <!-- Historial de Pedidos -->
+        <div class="admin-box">
+            <h2>Historial de Pedidos</h2>
+            
+            {% if pedidos %}
+            <div class="table-responsive">
+                <table class="admin-orders-table">
+                    <thead>
+                        <tr>
+                            <th>Nº Pedido</th>
+                            <th>Cliente</th>
+                            <th>Recogida</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos %}
+                        <tr>
+                            <td>Pedido #{{ pedido.id|stringformat:"03d" }}</td>
+                            <td>
+                                {% if pedido.usuario.get_full_name %}
+                                    {{ pedido.usuario.get_full_name }}
+                                {% else %}
+                                    {{ pedido.usuario.username }}
+                                {% endif %}
+                            </td>
+                            <td>{{ pedido.dia_recogida|default:"Hoy" }}</td>
+                            <td>{{ pedido.total|floatformat:2 }} €</td>
+                            <td>
+                                <form action="{% url 'shop:cambiar_estado' pedido.id %}" method="POST" style="margin: 0;" id="form-estado-{{ pedido.id }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="estado" id="input-estado-{{ pedido.id }}" value="{{ pedido.estado }}">
+                                    <div class="custom-status-btn" onclick="openStatusOverlay('{{ pedido.id }}')">
+                                        {{ pedido.get_estado_display }} <i class="fas fa-chevron-down" style="padding-left: 4px; font-size: 0.6rem;"></i>
+                                    </div>
+                                </form>
+                            </td>
+                            <td>
+                                <button class="btn-detalle" 
+                                    data-id="{{ pedido.id }}"
+                                    data-numero="{{ pedido.id|stringformat:"03d" }}"
+                                    data-cliente="{% if pedido.usuario.get_full_name %}{{ pedido.usuario.get_full_name|escapejs }}{% else %}{{ pedido.usuario.username|escapejs }}{% endif %}"
+                                    data-email="{{ pedido.usuario.email|escapejs }}"
+                                    data-recogida="{{ pedido.dia_recogida|default:"Hoy"|escapejs }}"
+                                    data-estado="{{ pedido.get_estado_display|escapejs }}"
+                                    data-total="{{ pedido.total|floatformat:2|escapejs }}"
+                                    data-productos='[{% for linea in pedido.lineas.all %}{"nombre": "{{ linea.producto.nombre|escapejs }}", "cantidad": {{ linea.cantidad }}, "precio": "{{ linea.precio_unidad|floatformat:2|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
+                                    onclick="openModal(this)">
+                                    <span class="btn-text-desktop">Ver detalle</span>
+                                    <i class="fas fa-eye btn-icon-mobile" style="display:none;"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>No hay pedidos registrados en el sistema.</p>
+            {% endif %}
+            
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal de Detalles del Pedido -->
+<div id="order-modal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        
+        <div class="modal-section" style="margin-bottom:1rem;">
+            <h3 style="text-align:center; border:none; margin-bottom:1rem; font-size:1.2rem;">Información del cliente</h3>
+            <div class="modal-grid">
+                <div class="modal-field">
+                    <label>Número de Pedido</label>
+                    <span id="modal-order-num"></span>
+                </div>
+                <div class="modal-field">
+                    <label>Cliente</label>
+                    <span id="modal-client-name"></span>
+                </div>
+                <div class="modal-field">
+                    <label>Email</label>
+                    <span id="modal-client-email"></span>
+                </div>
+                <div class="modal-field">
+                    <label>Estado Actual</label>
+                    <span id="modal-order-state"></span>
+                </div>
+                <div class="modal-field">
+                    <label>Recogida</label>
+                    <span id="modal-pickup-day"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-section">
+            <h3 style="text-align:center; border:none; font-size:1.1rem;">Resumen del pedido</h3>
+            <ul id="modal-products-list" class="modal-products-list">
+                <!-- Se rellena con JS -->
+            </ul>
+            <div class="modal-total">
+                <span>Total</span>
+                <span id="modal-total-amt"></span>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button onclick="closeModal()" class="btn-modal btn-modal-secondary">Salir</button>
+            <button class="btn-modal btn-modal-secondary" id="btn-imprimir">Imprimir recibo</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Overlay Cambio de Estado -->
+<div id="status-overlay" class="status-overlay" onclick="closeStatusOverlay(event)">
+    <div class="status-dialog">
+        <h3>Actualizar Estado</h3>
+        <div class="status-list">
+            {% for cod, texto in estados %}
+                <button class="status-list-btn" onclick="submitNewStatus('{{ cod }}')">{{ texto }}</button>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    let targetFormId = null;
+    let targetInputId = null;
+
+    function openStatusOverlay(pedidoId) {
+        targetFormId = `form-estado-${pedidoId}`;
+        targetInputId = `input-estado-${pedidoId}`;
+        document.getElementById('status-overlay').style.display = 'flex';
+    }
+
+    function closeStatusOverlay(event) {
+        if(event.target.id === 'status-overlay') {
+            document.getElementById('status-overlay').style.display = 'none';
+        }
+    }
+
+    function submitNewStatus(cod) {
+        document.getElementById(targetInputId).value = cod;
+        document.getElementById(targetFormId).submit();
+    }
+
+    function openModal(btn) {
+        const data = btn.dataset;
+        document.getElementById('modal-order-num').textContent = 'Pedido #' + data.numero;
+        document.getElementById('modal-client-name').textContent = data.cliente;
+        document.getElementById('modal-client-email').textContent = data.email;
+        document.getElementById('modal-order-state').textContent = data.estado;
+        document.getElementById('modal-pickup-day').textContent = data.recogida;
+        document.getElementById('modal-total-amt').textContent = data.total + ' €';
+        
+        const list = document.getElementById('modal-products-list');
+        list.innerHTML = '';
+        
+        try {
+            const productos = JSON.parse(data.productos);
+            
+            let resumenNames = [];
+            productos.forEach(p => {
+                resumenNames.push(`${p.cantidad} ${p.nombre}`);
+            });
+            
+            list.innerHTML += `<div style="font-size: 0.9rem; color: #4a3b32; font-weight: bold; margin-bottom: 0.3rem; margin-top: 0.5rem;">Cantidad/Producto</div>`;
+            list.innerHTML += `<div style="font-size: 0.85rem; margin-bottom: 1rem;">${resumenNames.join(', ')}</div>`;
+            
+            list.innerHTML += `<div style="font-size: 0.9rem; color: #4a3b32; font-weight: bold; margin-bottom: 0.3rem;">Precio Unitario</div>`;
+            
+            productos.forEach(p => {
+                const li = document.createElement('li');
+                li.className = 'modal-product-item';
+                li.innerHTML = `<span>${p.cantidad}x ${p.nombre}</span><span>${p.precio} €</span>`;
+                list.appendChild(li);
+            });
+        } catch (e) {
+            console.error("Error parsing products JSON:", e);
+        }
+
+        // Configurar botón de impresión
+        document.getElementById('btn-imprimir').onclick = function() {
+            const originalTitle = document.title;
+            const fechaActual = new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
+            const fileName = `Recibo_${data.cliente.replace(/\s+/g, '_')}_${data.numero}_${fechaActual}`;
+            
+            document.title = fileName;
+            window.print();
+            document.title = originalTitle;
+        };
+
+        document.getElementById('order-modal').style.display = 'flex';
+    }
+
+    function closeModal(event) {
+        document.getElementById('order-modal').style.display = 'none';
+    }
+</script>
+{% endblock %}

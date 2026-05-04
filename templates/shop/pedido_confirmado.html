@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pedido Confirmado - Obrador Artesano{% endblock %}
+
+{% block content %}
+<style>
+    .confirm-wrapper {
+        min-height: calc(100vh - 150px);
+        background-color: #f6f5e9;
+        padding: 4rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .confirm-box {
+        background-color: #e6c5a8;
+        border-radius: 16px;
+        padding: 3.5rem 3rem;
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+    .confirm-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+    }
+    .confirm-box h1 {
+        font-family: 'Playfair Display', serif;
+        color: #4a3b32;
+        font-size: 2.2rem;
+        margin-bottom: 1rem;
+    }
+    .confirm-box p {
+        color: #4a3b32;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin: 0.5rem 0;
+    }
+    .confirm-details {
+        background-color: rgba(255,255,255,0.4);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        text-align: left;
+    }
+    .confirm-details p {
+        margin: 0.5rem 0;
+        font-size: 1rem;
+    }
+    .confirm-detail-label {
+        font-weight: bold;
+    }
+    .confirm-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+    .btn-primary {
+        background-color: #c4966d;
+        color: #4a3b32;
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+    .btn-primary:hover {
+        background-color: #b08159;
+    }
+    .btn-secondary {
+        background-color: transparent;
+        color: #4a3b32;
+        border: 2px solid #c4966d;
+        padding: 0.8rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+    .btn-secondary:hover {
+        background-color: #c4966d;
+    }
+</style>
+
+<div class="confirm-wrapper">
+    <div class="confirm-box">
+        <div class="confirm-icon">🍞</div>
+        <h1>¡Pedido Confirmado!</h1>
+        <p>Gracias por tu reserva en <strong>Obrador Artesano</strong>.</p>
+        <p>Tu pedido ha sido recibido y está listo para ser preparado con todo nuestro cariño.</p>
+
+        <div class="confirm-details">
+            <p><span class="confirm-detail-label">Número de pedido:</span> #{{ pedido.id|stringformat:"03d" }}</p>
+            <p><span class="confirm-detail-label">Día de recogida:</span> {{ pedido.dia_recogida|default:"Hoy" }}</p>
+            <p><span class="confirm-detail-label">Fecha del pedido:</span> {{ pedido.fecha|date:"d/m/Y" }}</p>
+            <p><span class="confirm-detail-label">Total:</span> {{ pedido.total|floatformat:2 }} €</p>
+            <p><span class="confirm-detail-label">Estado:</span> {{ pedido.get_estado_display }}</p>
+        </div>
+
+        <p style="font-size: 0.95rem; color: #7a6050;">Puedes revisar el estado de tu pedido en la sección <strong>Mi Cuenta</strong>.</p>
+
+        <div class="confirm-actions">
+            <a href="{% url 'mi_cuenta' %}" class="btn-primary">Ver mis pedidos</a>
+            <a href="{% url 'shop:producto_list' %}" class="btn-secondary">Seguir comprando</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
