@@ -14,9 +14,9 @@
 
         <div class="auth-card">
             {% if messages %}
-                <div class="auth-messages" style="margin-bottom: 1rem;">
+                <div class="auth-messages">
                     {% for message in messages %}
-                        <div class="auth-msg {% if message.tags %}{{ message.tags }}{% endif %}" style="background-color: {% if message.tags == 'error' %}#f8d7da{% else %}#d4edda{% endif %}; color: {% if message.tags == 'error' %}#721c24{% else %}#155724{% endif %}; padding: 0.8rem; border-radius: 8px; font-size: 0.9rem; text-align: left; margin-bottom: 0.5rem;">
+                        <div class="auth-msg {{ message.tags }}">
                             {{ message }}
                         </div>
                     {% endfor %}

@@ -7,15 +7,17 @@ class EmailOrUsernameModelBackend(ModelBackend):
         if username is None:
             username = kwargs.get(User.USERNAME_FIELD)
         
+        user = None
         try:
-            # Check if user exists by username OR email
-            user = User.objects.get(Q(username__iexact=username) | Q(email__iexact=username))
-        except User.DoesNotExist:
+            # Try to get user by username, email, or first_name (display name)
+            user = User.objects.filter(
+                Q(username__iexact=username) | 
+                Q(email__iexact=username) | 
+                Q(first_name__iexact=username)
+            ).first()
+        except Exception:
             return None
-        except User.MultipleObjectsReturned:
-            # If multiple users found, try to get the one with the exact username match
-            return User.objects.filter(username=username).first()
         
-        if user.check_password(password) and self.user_can_authenticate(user):
+        if user and user.check_password(password) and self.user_can_authenticate(user):
             return user
         return None

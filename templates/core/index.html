@@ -38,4 +38,376 @@
     </div>
     </div>
 </section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  SECCIÓN DE RESEÑAS (alimentada por API)   -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="reseñas" class="resenas-section">
+    <h2 class="section-title">Lo que dicen nuestros clientes</h2>
+    <p class="resenas-subtitle">Opiniones reales de personas que han pasado por el obrador</p>
+
+    <!-- Tarjetas de reseñas (cargadas dinámicamente vía fetch) -->
+    <div id="resenas-grid" class="resenas-grid">
+        <div class="resena-loading">
+            <i class="fas fa-spinner fa-spin"></i> Cargando opiniones…
+        </div>
+    </div>
+
+    <!-- Formulario para nueva reseña -->
+    <!-- Contenedor para datos de sesión (evita errores de linter en JS) -->
+    <div id="resenas-session-data" 
+         style="display:none;" 
+         data-is-superuser="{% if user.is_authenticated and user.is_superuser %}true{% else %}false{% endif %}"
+         data-user-id="{{ user.id|default:'null' }}">
+    </div>
+
+    <div class="resena-form-wrapper">
+        {% if user.is_authenticated %}
+        <h3 class="resena-form-title">Deja tu opinión</h3>
+        <form id="resena-form" class="resena-form" novalidate>
+            {% csrf_token %}
+
+            <!-- Estrellitas interactivas mejoradas -->
+            <div class="star-rating" id="star-rating">
+                <div class="star-container" data-star="1">
+                    <i class="far fa-star"></i><div class="star-fill"><i class="fas fa-star"></i></div>
+                    <div class="star-half-zone star-half-zone--left" data-value="0.5"></div>
+                    <div class="star-half-zone star-half-zone--right" data-value="1.0"></div>
+                </div>
+                <div class="star-container" data-star="2">
+                    <i class="far fa-star"></i><div class="star-fill"><i class="fas fa-star"></i></div>
+                    <div class="star-half-zone star-half-zone--left" data-value="1.5"></div>
+                    <div class="star-half-zone star-half-zone--right" data-value="2.0"></div>
+                </div>
+                <div class="star-container" data-star="3">
+                    <i class="far fa-star"></i><div class="star-fill"><i class="fas fa-star"></i></div>
+                    <div class="star-half-zone star-half-zone--left" data-value="2.5"></div>
+                    <div class="star-half-zone star-half-zone--right" data-value="3.0"></div>
+                </div>
+                <div class="star-container" data-star="4">
+                    <i class="far fa-star"></i><div class="star-fill"><i class="fas fa-star"></i></div>
+                    <div class="star-half-zone star-half-zone--left" data-value="3.5"></div>
+                    <div class="star-half-zone star-half-zone--right" data-value="4.0"></div>
+                </div>
+                <div class="star-container" data-star="5">
+                    <i class="far fa-star"></i><div class="star-fill"><i class="fas fa-star"></i></div>
+                    <div class="star-half-zone star-half-zone--left" data-value="4.5"></div>
+                    <div class="star-half-zone star-half-zone--right" data-value="5.0"></div>
+                </div>
+            </div>
+            <input type="hidden" id="puntuacion-input" name="puntuacion" value="5.0">
+
+            <textarea
+                id="texto-resena"
+                class="resena-textarea"
+                placeholder="Cuéntanos tu experiencia con nuestros productos…"
+                rows="4"
+                maxlength="500"
+                required
+            ></textarea>
+            <div id="resena-error" class="resena-error" style="display:none;"></div>
+            <button type="submit" id="resena-submit-btn" class="btn-submit-resena">
+                <i class="fas fa-paper-plane"></i> Publicar reseña
+            </button>
+        </form>
+        {% else %}
+        <div class="resena-login-prompt">
+            <i class="fas fa-lock"></i>
+            <p>¿Quieres dejar tu opinión? <a href="{% url 'login' %}?next={% url 'home' %}">Inicia sesión</a> o <a href="{% url 'register' %}">regístrate</a> gratis.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+(function () {
+    'use strict';
+
+    const API_LIST_URL  = '/shop/api/resenas/';
+    const API_POST_URL  = '/shop/api/resenas/crear/';
+    const grid          = document.getElementById('resenas-grid');
+    const form          = document.getElementById('resena-form');
+    const errorBox      = document.getElementById('resena-error');
+    const submitBtn     = document.getElementById('resena-submit-btn');
+
+    // ── Helpers ──────────────────────────────────────────────
+    function estrellas(n) {
+        let html = '';
+        const fullStars = Math.floor(n);
+        const hasHalf   = (n % 1) !== 0;
+        
+        for (let i = 0; i < fullStars; i++) {
+            html += '<i class="fas fa-star"></i>';
+        }
+        if (hasHalf) {
+            html += '<i class="fas fa-star-half-alt"></i>';
+        }
+        const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+        for (let i = 0; i < emptyStars; i++) {
+            html += '<i class="far fa-star"></i>';
+        }
+        return html;
+    }
+
+    const sessionData = document.getElementById('resenas-session-data');
+    const isSuperuser = sessionData.dataset.isSuperuser === 'true';
+    const currentUserId = sessionData.dataset.userId !== 'null' ? parseInt(sessionData.dataset.userId) : null;
+
+    function crearTarjeta({ id, usuario, usuario_id, puntuacion, texto, fecha, respuesta, fecha_respuesta }, esNueva = false) {
+        const card = document.createElement('div');
+        card.className = 'resena-card' + (esNueva ? ' resena-card--nueva' : '');
+        card.dataset.id = id;
+
+        // Botón eliminar reseña (solo autor o admin)
+        let deleteBtn = '';
+        if (isSuperuser || (currentUserId && currentUserId === usuario_id)) {
+            deleteBtn = `<button class="btn-delete-resena" onclick="eliminarResena(${id})" title="Eliminar reseña"><i class="fas fa-trash-alt"></i></button>`;
+        }
+
+        let replyHtml = '';
+        if (respuesta) {
+            let deleteReplyBtn = isSuperuser ? `<button class="btn-delete-reply" onclick="eliminarRespuesta(${id})" title="Eliminar respuesta"><i class="fas fa-times"></i></button>` : '';
+            replyHtml = `
+                <div class="resena-reply-block">
+                    <div class="resena-reply-header">
+                        <span class="owner-badge"><i class="fas fa-check-circle"></i> Propietario</span>
+                        <span class="resena-reply-date">${fecha_respuesta || ''}</span>
+                        ${deleteReplyBtn}
+                    </div>
+                    <p class="resena-reply-text">${respuesta}</p>
+                </div>
+            `;
+        } else if (isSuperuser) {
+            replyHtml = `
+                <button class="btn-admin-reply" onclick="toggleReplyForm(${id})">Responder como propietario</button>
+                <div id="reply-form-${id}" class="admin-reply-form">
+                    <textarea class="admin-reply-textarea" placeholder="Escribe tu respuesta..."></textarea>
+                    <div class="admin-reply-actions">
+                        <button class="btn-save-reply" onclick="enviarRespuesta(${id})">Guardar</button>
+                        <button class="btn-cancel-reply" onclick="toggleReplyForm(${id})">Cancelar</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        card.innerHTML = `
+            <div class="resena-header">
+                <span class="resena-avatar">${usuario.charAt(0).toUpperCase()}</span>
+                <div>
+                    <strong class="resena-autor">${usuario}</strong>
+                    <span class="resena-fecha">${fecha}</span>
+                </div>
+                <div class="resena-header-right">
+                    <span class="resena-stars">${estrellas(puntuacion)}</span>
+                    ${deleteBtn}
+                </div>
+            </div>
+            <p class="resena-texto">"${texto}"</p>
+            <div class="resena-reply-container">${replyHtml}</div>
+        `;
+        return card;
+    }
+
+    // Funciones globales para Admin (disponibles en el onclick)
+    window.toggleReplyForm = (id) => {
+        const form = document.getElementById(`reply-form-${id}`);
+        if (form) form.style.display = (form.style.display === 'block') ? 'none' : 'block';
+    };
+
+    window.enviarRespuesta = (id) => {
+        const form = document.getElementById(`reply-form-${id}`);
+        const textarea = form.querySelector('textarea');
+        const respuesta = textarea.value.trim();
+        const container = form.closest('.resena-reply-container');
+
+        if (!respuesta) return;
+
+        fetch(`/shop/api/resenas/responder/${id}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({ respuesta })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                container.innerHTML = `
+                    <div class="resena-reply-block">
+                        <div class="resena-reply-header">
+                            <span class="owner-badge"><i class="fas fa-check-circle"></i> Propietario</span>
+                            <span class="resena-reply-date">${data.fecha_respuesta}</span>
+                        </div>
+                        <p class="resena-reply-text">${respuesta}</p>
+                    </div>
+                `;
+            } else {
+                alert(data.error || 'Error al guardar respuesta');
+            }
+        });
+    };
+
+    window.eliminarResena = (id) => {
+        if (!confirm('¿Estás seguro de que quieres eliminar esta reseña? Esta acción no se puede deshacer.')) return;
+
+        fetch(`/shop/api/resenas/eliminar/${id}/`, {
+            method: 'DELETE',
+            headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                const card = document.querySelector(`.resena-card[data-id="${id}"]`);
+                if (card) {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.9)';
+                    setTimeout(() => card.remove(), 400);
+                }
+            } else {
+                alert(data.error);
+            }
+        });
+    };
+
+    window.eliminarRespuesta = (id) => {
+        if (!confirm('¿Quieres eliminar la respuesta del propietario?')) return;
+
+        fetch(`/shop/api/resenas/respuesta/eliminar/${id}/`, {
+            method: 'DELETE',
+            headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                location.reload(); // Recarga simple para limpiar el estado
+            } else {
+                alert(data.error);
+            }
+        });
+    };
+
+    // ── Cargar reseñas (GET) ──────────────────────────────────
+    function cargarReseñas() {
+        fetch(API_LIST_URL)
+            .then(r => r.json())
+            .then(data => {
+                grid.innerHTML = '';
+                if (!data.resenas || data.resenas.length === 0) {
+                    grid.innerHTML = '<p class="resenas-empty">Sé el primero en dejar una opinión 🍞</p>';
+                    return;
+                }
+                data.resenas.forEach(r => grid.appendChild(crearTarjeta(r, false)));
+            })
+            .catch(() => {
+                grid.innerHTML = '<p class="resenas-empty">No se pudieron cargar las reseñas en este momento.</p>';
+            });
+    }
+
+    // ── Estrellitas interactivas (nueva lógica 0.5) ────────────
+    const starsContainer = document.getElementById('star-rating');
+    const puntuacionInput = document.getElementById('puntuacion-input');
+
+    function pintarEstrellas(valor) {
+        if (!starsContainer) return;
+        const containers = starsContainer.querySelectorAll('.star-container');
+        
+        containers.forEach((container, index) => {
+            const fill = container.querySelector('.star-fill');
+            const starNum = index + 1;
+            
+            if (valor >= starNum) {
+                fill.style.width = '100%';
+            } else if (valor >= starNum - 0.5) {
+                fill.style.width = '50%';
+            } else {
+                fill.style.width = '0%';
+            }
+        });
+    }
+
+    if (starsContainer) {
+        const zones = starsContainer.querySelectorAll('.star-half-zone');
+
+        // Inicializar
+        pintarEstrellas(parseFloat(puntuacionInput.value));
+
+        zones.forEach(zone => {
+            const val = parseFloat(zone.dataset.value);
+            
+            zone.addEventListener('mouseover', () => pintarEstrellas(val));
+            zone.addEventListener('click', () => {
+                puntuacionInput.value = val.toFixed(1);
+                pintarEstrellas(val);
+            });
+        });
+
+        starsContainer.addEventListener('mouseleave', () => {
+            pintarEstrellas(parseFloat(puntuacionInput.value));
+        });
+    }
+
+    // ── Enviar reseña (POST) ──────────────────────────────────
+    if (form) {
+        const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            errorBox.style.display = 'none';
+
+            const texto     = document.getElementById('texto-resena').value.trim();
+            const puntuacion = parseInt(puntuacionInput.value);
+
+            if (!texto) {
+                errorBox.textContent = 'Por favor, escribe un comentario antes de publicar.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publicando…';
+
+            fetch(API_POST_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({ texto, puntuacion }),
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    // Insertar la nueva tarjeta al principio del grid
+                    const nuevaTarjeta = crearTarjeta(data.resena, true);
+                    grid.prepend(nuevaTarjeta);
+                    // Quitar mensaje "sé el primero"
+                    const empty = grid.querySelector('.resenas-empty');
+                    if (empty) empty.remove();
+                    // Animar entrada
+                    requestAnimationFrame(() => nuevaTarjeta.classList.add('resena-card--visible'));
+                    // Limpiar formulario
+                    form.reset();
+                    puntuacionInput.value = "5.0";
+                    if (starsContainer) pintarEstrellas(5.0);
+                } else {
+                    errorBox.textContent = data.error || 'Ha ocurrido un error. Inténtalo de nuevo.';
+                    errorBox.style.display = 'block';
+                }
+            })
+            .catch(() => {
+                errorBox.textContent = 'Error de conexión. Comprueba tu red e inténtalo de nuevo.';
+                errorBox.style.display = 'block';
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Publicar reseña';
+            });
+        });
+    }
+
+    // Cargar al iniciar la página
+    cargarReseñas();
+})();
+</script>
 {% endblock %}

@@ -353,38 +353,74 @@
 
             <div class="sidebar-box">
                 <h2>Selector de Recogida</h2>
-                <div class="pickup-options">
-                    <label class="pickup-option">
-                        <span>Lunes</span>
+                <div class="pickup-options" id="pickup-options-container">
+                    <label class="pickup-option" data-day="Lunes">
+                        <span class="day-label">Lunes</span>
                         <input type="radio" name="pickup_day" value="Lunes" checked>
                     </label>
-                    <label class="pickup-option">
-                        <span>Martes</span>
+                    <label class="pickup-option" data-day="Martes">
+                        <span class="day-label">Martes</span>
                         <input type="radio" name="pickup_day" value="Martes">
                     </label>
-                    <label class="pickup-option">
-                        <span>Miércoles</span>
-                        <input type="radio" name="pickup_day" value="Miercoles">
+                    <label class="pickup-option" data-day="Miércoles">
+                        <span class="day-label">Miércoles</span>
+                        <input type="radio" name="pickup_day" value="Miércoles">
                     </label>
-                    <label class="pickup-option">
-                        <span>Jueves</span>
+                    <label class="pickup-option" data-day="Jueves">
+                        <span class="day-label">Jueves</span>
                         <input type="radio" name="pickup_day" value="Jueves">
                     </label>
-                    <label class="pickup-option">
-                        <span>Viernes</span>
+                    <label class="pickup-option" data-day="Viernes">
+                        <span class="day-label">Viernes</span>
                         <input type="radio" name="pickup_day" value="Viernes">
                     </label>
-                    <label class="pickup-option">
-                        <span>Sábado</span>
-                        <input type="radio" name="pickup_day" value="Sabado">
+                    <label class="pickup-option" data-day="Sábado">
+                        <span class="day-label">Sábado</span>
+                        <input type="radio" name="pickup_day" value="Sábado">
                     </label>
-                    <label class="pickup-option">
-                        <span>Domingo</span>
+                    <label class="pickup-option" data-day="Domingo">
+                        <span class="day-label">Domingo</span>
                         <input type="radio" name="pickup_day" value="Domingo">
                     </label>
                 </div>
             </div>
         </form>
+
+        <script>
+        (function() {
+            const container = document.getElementById('pickup-options-container');
+            if (!container) return;
+
+            const daysMap = {
+                'Domingo': 0, 'Lunes': 1, 'Martes': 2, 'Miércoles': 3, 
+                'Jueves': 4, 'Viernes': 5, 'Sábado': 6
+            };
+
+            const options = container.querySelectorAll('.pickup-option');
+            const today = new Date();
+            
+            options.forEach(option => {
+                const dayName = option.dataset.day;
+                const targetDay = daysMap[dayName];
+                
+                // Calcular días hasta el próximo objetivo
+                let daysDiff = targetDay - today.getDay();
+                if (daysDiff <= 0) daysDiff += 7; // Siempre mostramos a partir de mañana o próxima semana
+
+                const targetDate = new Date(today);
+                targetDate.setDate(today.getDate() + daysDiff);
+
+                const day = String(targetDate.getDate()).padStart(2, '0');
+                const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+                const dateStr = `${day}/${month}`;
+                const fullValue = `${dayName} (${dateStr})`;
+
+                // Actualizar Label y Value
+                option.querySelector('.day-label').textContent = fullValue;
+                option.querySelector('input').value = fullValue;
+            });
+        })();
+        </script>
         {% endif %}
     </div>
 </div>

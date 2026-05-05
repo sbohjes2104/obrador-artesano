@@ -1,5 +1,12 @@
 from django.contrib import admin
-from .models import Categoria, Producto, Alergeno, Pedido, LineaPedido
+from .models import Categoria, Producto, Alergeno, Pedido, LineaPedido, Reseña
+
+
+@admin.register(Reseña)
+class ReseñaAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'puntuacion', 'fecha', 'texto')
+    list_filter = ('puntuacion',)
+    search_fields = ('usuario__username', 'texto')
 
 
 class LineaPedidoInline(admin.TabularInline):

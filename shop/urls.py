@@ -20,4 +20,11 @@ urlpatterns = [
     # Checkout
     path('carrito/confirmar/', views.confirmar_reserva, name='confirmar_reserva'),
     path('pedido/<int:pedido_id>/confirmado/', views.pedido_confirmado, name='pedido_confirmado'),
+
+    # API de Reseñas
+    path('api/resenas/', views.api_reseñas, name='api_reseñas'),
+    path('api/resenas/crear/', views.api_crear_reseña, name='api_crear_reseña'),
+    path('api/resenas/responder/<int:resena_id>/', views.api_responder_resena, name='api_responder_resena'),
+    path('api/resenas/eliminar/<int:resena_id>/', views.api_eliminar_resena, name='api_eliminar_resena'),
+    path('api/resenas/respuesta/eliminar/<int:resena_id>/', views.api_eliminar_respuesta, name='api_eliminar_respuesta'),
 ]

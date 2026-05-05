@@ -53,3 +53,18 @@ class LineaPedido(models.Model):
 
     def __str__(self):
         return f"{self.cantidad}x {self.producto.nombre if self.producto else 'Producto eliminado'}"
+
+
+class Reseña(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reseñas')
+    texto = models.TextField()
+    puntuacion = models.DecimalField(max_digits=2, decimal_places=1, default=5.0)  # 0.5 a 5.0 estrellas
+    fecha = models.DateTimeField(auto_now_add=True)
+    respuesta = models.TextField(blank=True, null=True)
+    fecha_respuesta = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-fecha']
+
+    def __str__(self):
+        return f"Reseña de {self.usuario.first_name or self.usuario.username} ({self.puntuacion}★)"
