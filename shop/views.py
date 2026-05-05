@@ -2,7 +2,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from .models import Producto, Categoria, Alergeno, Pedido, LineaPedido
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .models import Producto, Categoria, Alergeno, Pedido, LineaPedido, Reseña
 from .cart import Carrito
 
 def producto_list(request):
@@ -97,8 +101,7 @@ def confirmar_reserva(request):
         
         # Vaciar el carrito
         carrito.limpiar()
-        
-        messages.success(request, f'¡Pedido #{pedido.id} confirmado! Te esperamos en la tienda para la recogida. 🍞')
+
         return redirect('shop:pedido_confirmado', pedido_id=pedido.id)
     
     return redirect('shop:ver_carrito')
@@ -153,3 +156,134 @@ def cambiar_estado_pedido(request, pedido_id):
             pedido.save()
             
     return redirect('shop:administracion')
+
+
+# ─────────────────────────────────────────────
+#  API DE RESEÑAS
+# ─────────────────────────────────────────────
+
+@require_GET
+def api_reseñas(request):
+    """GET /api/reseñas/ → devuelve todas las reseñas en formato JSON."""
+    reseñas = Reseña.objects.select_related('usuario').all()
+    data = []
+    for r in reseñas:
+        data.append({
+            'id': r.id,
+            'usuario': r.usuario.first_name or r.usuario.username,
+            'usuario_id': r.usuario.id,
+            'texto': r.texto,
+            'puntuacion': float(r.puntuacion),
+            'fecha': r.fecha.strftime('%d/%m/%Y'),
+            'respuesta': r.respuesta,
+            'fecha_respuesta': r.fecha_respuesta.strftime('%d/%m/%Y') if r.fecha_respuesta else None,
+        })
+    return JsonResponse({'resenas': data})
+
+
+@csrf_exempt
+@require_POST
+def api_crear_reseña(request):
+    """POST /api/reseñas/crear/ → crea una reseña, responde JSON."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Debes iniciar sesión para dejar una reseña.'}, status=401)
+
+    try:
+        body = json.loads(request.body)
+        texto = body.get('texto', '').strip()
+        puntuacion = float(body.get('puntuacion', 5.0))
+    except (json.JSONDecodeError, ValueError, TypeError):
+        return JsonResponse({'error': 'Datos inválidos.'}, status=400)
+
+    if not texto:
+        return JsonResponse({'error': 'El comentario no puede estar vacío.'}, status=400)
+    if not (0.5 <= puntuacion <= 5.0):
+        return JsonResponse({'error': 'La puntuación debe estar entre 0.5 y 5.'}, status=400)
+
+    reseña = Reseña.objects.create(
+        usuario=request.user,
+        texto=texto,
+        puntuacion=puntuacion,
+    )
+
+    return JsonResponse({
+        'status': 'ok',
+        'resena': {
+            'id': reseña.id,
+            'usuario': reseña.usuario.first_name or reseña.usuario.username,
+            'usuario_id': reseña.usuario.id,
+            'texto': reseña.texto,
+            'puntuacion': reseña.puntuacion,
+            'fecha': reseña.fecha.strftime('%d/%m/%Y'),
+            'respuesta': None,
+        }
+    }, status=201)
+
+from django.utils import timezone
+
+@csrf_exempt
+@require_POST
+def api_responder_resena(request, resena_id):
+    """POST /api/resenas/responder/<id>/ → permite al superuser responder."""
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return JsonResponse({'error': 'Solo el administrador puede responder.'}, status=403)
+
+    try:
+        body = json.loads(request.body)
+        respuesta = body.get('respuesta', '').strip()
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Datos inválidos.'}, status=400)
+
+    if not respuesta:
+        return JsonResponse({'error': 'La respuesta no puede estar vacía.'}, status=400)
+
+    try:
+        reseña = Reseña.objects.get(id=resena_id)
+        reseña.respuesta = respuesta
+        reseña.fecha_respuesta = timezone.now()
+        reseña.save()
+    except Reseña.DoesNotExist:
+        return JsonResponse({'error': 'Reseña no encontrada.'}, status=404)
+
+    return JsonResponse({
+        'status': 'ok',
+        'fecha_respuesta': reseña.fecha_respuesta.strftime('%d/%m/%Y')
+    })
+
+@csrf_exempt
+def api_eliminar_resena(request, resena_id):
+    """DELETE /api/resenas/eliminar/<id>/ → autor o admin."""
+    if request.method != 'DELETE':
+        return JsonResponse({'error': 'Método no permitido.'}, status=405)
+    
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Inicia sesión para realizar esta acción.'}, status=401)
+
+    try:
+        reseña = Reseña.objects.get(id=resena_id)
+        # Comprobar si es el autor o es superuser
+        if reseña.usuario != request.user and not request.user.is_superuser:
+            return JsonResponse({'error': 'No tienes permiso para eliminar esta reseña.'}, status=403)
+        
+        reseña.delete()
+        return JsonResponse({'status': 'ok'})
+    except Reseña.DoesNotExist:
+        return JsonResponse({'error': 'Reseña no encontrada.'}, status=404)
+
+@csrf_exempt
+def api_eliminar_respuesta(request, resena_id):
+    """DELETE /api/resenas/respuesta/eliminar/<id>/ → solo admin."""
+    if request.method != 'DELETE':
+        return JsonResponse({'error': 'Método no permitido.'}, status=405)
+
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return JsonResponse({'error': 'No tienes permiso para eliminar respuestas.'}, status=403)
+
+    try:
+        reseña = Reseña.objects.get(id=resena_id)
+        reseña.respuesta = None
+        reseña.fecha_respuesta = None
+        reseña.save()
+        return JsonResponse({'status': 'ok'})
+    except Reseña.DoesNotExist:
+        return JsonResponse({'error': 'Reseña no encontrada.'}, status=404)

@@ -908,3 +908,423 @@ h1, h2, h3, h4, h5, h6 {
         display: none;
     }
 }
+
+/* ═══════════════════════════════════════════
+   SECCIÓN DE RESEÑAS
+   ═══════════════════════════════════════════ */
+.resenas-section {
+    background-color: #FDF6ED;
+    padding: 3rem 20px 4rem;
+    border-top: 2px solid #D2B48C;
+}
+
+.resenas-subtitle {
+    text-align: center;
+    color: #7a5c44;
+    font-size: 1.05rem;
+    margin: -1rem 0 2rem;
+}
+
+/* Grid de tarjetas de reseñas */
+.resenas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto 3rem;
+}
+
+/* Estado de carga y vacío */
+.resena-loading,
+.resenas-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #9a7a62;
+    font-size: 1rem;
+    padding: 2rem;
+    opacity: 0.8;
+}
+
+/* Tarjeta individual */
+.resena-card {
+    background-color: #FFFFFF;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 3px 15px rgba(61, 43, 31, 0.07);
+    border-left: 4px solid #D2B48C;
+    /* Animación de entrada */
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.2s;
+}
+
+.resena-card--visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Las tarjetas cargadas del servidor se muestran de inmediato */
+.resena-card:not(.resena-card--nueva) {
+    opacity: 1;
+    transform: none;
+}
+
+.resena-card:hover {
+    box-shadow: 0 6px 25px rgba(61, 43, 31, 0.13);
+}
+
+.resena-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+}
+
+.resena-avatar {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background-color: #D2B48C;
+    color: #3D2B1F;
+    font-weight: bold;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.resena-autor {
+    display: block;
+    font-size: 0.95rem;
+    color: #3D2B1F;
+}
+
+.resena-header-right {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.btn-delete-resena {
+    background: none;
+    border: none;
+    color: #ecc;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 2px;
+    transition: color 0.2s;
+}
+
+.btn-delete-resena:hover {
+    color: #e44;
+}
+
+.btn-delete-reply {
+    background: none;
+    border: none;
+    color: #9a7a62;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 2px;
+    margin-left: auto;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.btn-delete-reply:hover {
+    opacity: 1;
+    color: #e44;
+}
+
+.resena-fecha {
+    display: block;
+    font-size: 0.78rem;
+    color: #9a7a62;
+}
+
+.resena-stars {
+    margin-left: auto;
+    color: #e0a800;
+    font-size: 0.95rem;
+    display: flex;
+    gap: 2px;
+}
+
+.resena-stars i {
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.05));
+}
+
+.resena-texto {
+    font-size: 0.95rem;
+    color: #5c3d2e;
+    line-height: 1.55;
+    margin: 0 0 1rem;
+    font-style: italic;
+}
+
+/* ── Bloque de Respuesta del Propietario ── */
+.resena-reply-block {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    background-color: #F8F1E9;
+    border-radius: 10px;
+    border-left: 3px solid #3D2B1F;
+    position: relative;
+    font-size: 0.9rem;
+}
+
+.resena-reply-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.owner-badge {
+    background-color: #3D2B1F;
+    color: #FFFFFF;
+    font-size: 0.72rem;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.owner-badge i {
+    font-size: 0.65rem;
+    color: #ffd700;
+}
+
+.resena-reply-date {
+    font-size: 0.75rem;
+    color: #9a7a62;
+}
+
+.resena-reply-text {
+    color: #3D2B1F;
+    line-height: 1.45;
+    margin: 0;
+}
+
+/* ── Botón y Formulario de Respuesta (Admin) ── */
+.btn-admin-reply {
+    background: none;
+    border: none;
+    color: #9a7a62;
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 0;
+    margin-top: 0.5rem;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.btn-admin-reply:hover {
+    color: #3D2B1F;
+}
+
+.admin-reply-form {
+    margin-top: 1rem;
+    display: none; /* Se activa por JS */
+}
+
+.admin-reply-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    margin-bottom: 0.5rem;
+    background-color: #fff;
+}
+
+.admin-reply-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-save-reply {
+    padding: 4px 12px;
+    background-color: #3D2B1F;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.btn-cancel-reply {
+    padding: 4px 12px;
+    background-color: #f3f4f6;
+    color: #374151;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+/* ── Formulario de nueva reseña ── */
+.resena-form-wrapper {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 4px 20px rgba(61, 43, 31, 0.09);
+}
+
+.resena-form-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: #3D2B1F;
+    margin: 0 0 1.25rem;
+    font-weight: normal;
+}
+
+/* Estrellitas interactivas mejoradas */
+.star-rating {
+    display: flex;
+    gap: 0.2rem;
+    margin: 0.5rem 0 1.5rem;
+    justify-content: center;
+}
+
+.star-container {
+    position: relative;
+    display: inline-block;
+    font-size: 2.2rem;
+    color: #e5e7eb;
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+
+.star-container:hover {
+    transform: scale(1.1);
+}
+
+.star-container .fa-star {
+    display: block;
+}
+
+/* Capa superior para la estrella rellena */
+.star-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0; /* Controlado por JS */
+    color: #e0a800;
+    overflow: hidden;
+    pointer-events: none;
+    transition: width 0.15s ease;
+}
+
+/* Zonas de detección para media estrella */
+.star-half-zone {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    z-index: 2;
+}
+.star-half-zone--left { left: 0; }
+.star-half-zone--right { left: 50%; }
+
+/* Textarea */
+.resena-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.85rem 1rem;
+    border: 1.5px solid #ddd;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    color: #3D2B1F;
+    background-color: #FAFAFA;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    line-height: 1.55;
+}
+
+.resena-textarea:focus {
+    outline: none;
+    border-color: #D2B48C;
+    box-shadow: 0 0 0 3px rgba(210, 180, 140, 0.25);
+    background-color: #FFF;
+}
+
+/* Mensaje de error */
+.resena-error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    margin: 0.75rem 0;
+}
+
+/* Botón de envío */
+.btn-submit-resena {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.8rem 1.5rem;
+    background-color: #3D2B1F;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.25s, transform 0.2s;
+}
+
+.btn-submit-resena:hover:not(:disabled) {
+    background-color: #5c3d2e;
+    transform: translateY(-2px);
+}
+
+.btn-submit-resena:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Prompt de login cuando no hay sesión */
+.resena-login-prompt {
+    text-align: center;
+    padding: 1.5rem;
+    color: #7a5c44;
+    font-size: 1rem;
+}
+
+.resena-login-prompt i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: #D2B48C;
+}
+
+.resena-login-prompt a {
+    color: #3D2B1F;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+    .resenas-grid {
+        grid-template-columns: 1fr;
+    }
+    .resena-form-wrapper {
+        padding: 1.5rem 1.25rem;
+    }
+}
