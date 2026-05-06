@@ -22,6 +22,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . .
 
-# Run management command usually happens in docker-compose or a script
-# Run gunicorn for production
-CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:${PORT:-8000} obrador.wsgi:application"]
+# Run everything in a single command chain for Railway
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput && python populate_data.py && python manage.py shell -c \"from django.contrib.auth.models import User; User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@admin.com', 'admin123')\" && gunicorn --bind 0.0.0.0:${PORT:-8000} obrador.wsgi:application"]
