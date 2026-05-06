@@ -34,40 +34,40 @@ def populate():
         Categoria.objects.get_or_create(nombre=cat_name)
 
     images = {
-        "pan_blanco": "/media/productos/pan_blanco.jpg",
-        "baguette": "/media/productos/baguette.jpg",
-        "pan_integral": "/media/productos/pan_integral.jpg",
-        "pan_masa_madre": "/media/productos/pan_masa_madre.jpg",
-        "pan_centeno": "/media/productos/pan_centeno.jpg",
-        "pan_multicereal": "/media/productos/pan_multicereal.jpg",
-        "pan_espinacas": "/media/productos/pan_espinacas.png",
-        "pan_avena": "/media/productos/pan_integral.jpg", # Reuso integral
-        "pan_sesamo": "/media/productos/pan_sesamo.png",
-        "pan_semillas": "/media/productos/pan_semillas.png",
+        "pan_blanco": "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?q=80&w=800",
+        "baguette": "https://images.unsplash.com/photo-1597079910443-60c43fc4f729?q=80&w=800",
+        "pan_integral": "https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800",
+        "pan_masa_madre": "https://images.unsplash.com/photo-1585478259715-876a6a8cffcc?q=80&w=800",
+        "pan_centeno": "https://images.unsplash.com/photo-1603532648955-0393a0b4edbd?q=80&w=800",
+        "pan_multicereal": "https://images.unsplash.com/photo-1555951015-6da899b5c2cd?q=80&w=800",
+        "pan_espinacas": "https://images.unsplash.com/photo-1533130061792-64b345e4a833?q=80&w=800",
+        "pan_avena": "https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800",
+        "pan_sesamo": "https://images.unsplash.com/photo-1555951015-6da899b5c2cd?q=80&w=800",
+        "pan_semillas": "https://images.unsplash.com/photo-1603532648955-0393a0b4edbd?q=80&w=800",
         
-        "croissant": "/media/productos/croissant.png",
-        "napolitana": "/media/productos/napolitana.jpg",
-        "caracola": "/media/productos/caracola_pasas.png",
-        "palmera": "/media/productos/palmera.jpg",
-        "ensaimada": "/media/productos/ensaimada.jpg",
+        "croissant": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=800",
+        "napolitana": "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?q=80&w=800",
+        "caracola": "https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800",
+        "palmera": "https://images.unsplash.com/photo-1530610476181-d83430b64dcd?q=80&w=800",
+        "ensaimada": "https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800",
         
-        "tarta_queso": "/media/productos/tarta_queso.jpg",
-        "tarta_manzana": "/media/productos/tarta_manzana.jpg",
-        "tarta_chocolate": "/media/productos/tarta_chocolate.jpg",
-        "red_velvet": "/media/productos/red_velvet.png",
-        "tarta_zanahoria": "/media/productos/tarta_zanahoria.jpg",
+        "tarta_queso": "https://images.unsplash.com/photo-1524351199679-46cddf302c31?q=80&w=800",
+        "tarta_manzana": "https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?q=80&w=800",
+        "tarta_chocolate": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=800",
+        "red_velvet": "https://images.unsplash.com/photo-1586788680434-30d324b2d46f?q=80&w=800",
+        "tarta_zanahoria": "https://images.unsplash.com/photo-1622920453303-34e8e19c0827?q=80&w=800",
         
-        "empanada": "/media/productos/empanada_atun.jpg",
-        "empanadilla": "/media/productos/empanadilla_carne.jpg",
-        "quiche": "/media/productos/quiche.jpg",
-        "croquetas": "/media/productos/croquetas.jpg",
-        "saladitos_surtidos": "/media/productos/saladitos_surtidos.jpg",
+        "empanada": "https://images.unsplash.com/photo-1628192134724-40e38a4cd33a?q=80&w=800",
+        "empanadilla": "https://images.unsplash.com/photo-1628192134724-40e38a4cd33a?q=80&w=800",
+        "quiche": "https://images.unsplash.com/photo-1612392166886-ee8475b03af2?q=80&w=800",
+        "croquetas": "https://images.unsplash.com/photo-1612392062631-94dd858cba88?q=80&w=800",
+        "saladitos_surtidos": "https://images.unsplash.com/photo-1628192134724-40e38a4cd33a?q=80&w=800",
         
-        "zumo_naranja": "/media/productos/zumo_naranja.jpg",
-        "cafe": "/media/productos/cafe.jpg",
-        "infusion": "/media/productos/infusion.jpg",
-        "agua": "/media/productos/agua.jpg",
-        "batido": "/media/productos/batido.jpg",
+        "zumo_naranja": "https://images.unsplash.com/photo-1547514701-42782101795e?q=80&w=800",
+        "cafe": "https://images.unsplash.com/photo-1541167760496-162956ed836f?q=80&w=800",
+        "infusion": "https://images.unsplash.com/photo-1571935443242-c1a1a79aa7c8?q=80&w=800",
+        "agua": "https://images.unsplash.com/photo-1548839140-29a749e1cf3d?q=80&w=800",
+        "batido": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?q=80&w=800",
     }
 
     products_data = [
@@ -130,6 +130,14 @@ def populate():
     deleted_count, _ = Producto.objects.exclude(nombre__in=current_names).delete()
     if deleted_count:
         print(f"Eliminados {deleted_count} productos obsoletos (incluyendo Saladito de lomo)")
+
+    # Create admin if it doesn't exist
+    from django.contrib.auth.models import User
+    if not User.objects.filter(username='admin').exists():
+        User.objects.create_superuser('admin', 'admin@admin.com', 'admin123')
+        print("Superusuario 'admin' creado correctamente.")
+    else:
+        print("El superusuario 'admin' ya existe.")
 
 if __name__ == '__main__':
     populate()
