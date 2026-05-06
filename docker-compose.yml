@@ -14,12 +14,13 @@ services:
 
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: sh -c "python manage.py migrate && python populate_data.py && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app:Z
     ports:
       - "8000:8000"
     environment:
+      - DEBUG=True
       - DB_NAME=obrador_db
       - DB_USER=obrador_user
       - DB_PASSWORD=obrador_password
