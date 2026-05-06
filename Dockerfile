@@ -24,4 +24,4 @@ COPY . .
 
 # Run management command usually happens in docker-compose or a script
 # Run gunicorn for production
-CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:${PORT:-8000} obrador.wsgi:application"]
+CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:${PORT:-8000} obrador.wsgi:application"]
