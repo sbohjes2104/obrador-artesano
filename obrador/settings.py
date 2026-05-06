@@ -91,9 +91,13 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # WhiteNoise storage to serve compressed files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Proxy settings for Railway
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in os.environ.get('ALLOWED_HOSTS', '').split(',') if host and host != '*']
 if not CSRF_TRUSTED_ORIGINS:
-    CSRF_TRUSTED_ORIGINS = ["https://*.railway.app"]
+    CSRF_TRUSTED_ORIGINS = ["https://*.railway.app", "https://*.up.railway.app"]
 
 # Media files
 MEDIA_URL = 'media/'
