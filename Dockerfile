@@ -23,4 +23,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Run management command usually happens in docker-compose or a script
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Run gunicorn for production
+CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:${PORT:-8000} obrador.wsgi:application"]

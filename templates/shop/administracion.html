@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 <style>
@@ -349,6 +350,9 @@
 
     /* Print Optimizations */
     @media print {
+        @page {
+            margin: 1.5cm;
+        }
         body * {
             visibility: hidden;
         }
@@ -360,22 +364,97 @@
             left: 0;
             top: 0;
             width: 100%;
-            display: flex !important;
-            background: none;
+            display: block !important;
+            background: white !important;
+            height: auto;
         }
         .modal-content {
-            box-shadow: none;
-            border: 1px solid #eee;
+            box-shadow: none !important;
+            border: none !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .modal-actions, .close-modal, .btn-detalle, .admin-wrapper, footer, header {
+            display: none !important;
+        }
+        
+        .screen-only {
+            display: none !important;
+        }
+        .print-only {
+            display: block !important;
+        }
+        
+        /* Receipt Specific Styles */
+        .receipt-header {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #4a3b32;
+            padding-bottom: 1.5rem;
+        }
+        .receipt-header img {
+            width: 100px;
+            margin-bottom: 1rem;
+        }
+        .receipt-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            margin: 0;
+            color: #4a3b32;
+        }
+        .receipt-info {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+        .receipt-table {
             width: 100%;
-            max-width: 100%;
-            padding: 0;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
         }
-        .modal-actions, .close-modal {
-            display: none !important;
+        .receipt-table th {
+            text-align: left;
+            border-bottom: 2px solid #4a3b32;
+            padding: 0.8rem 0;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            color: #4a3b32;
         }
-        .admin-wrapper, footer, header {
-            display: none !important;
+        .receipt-table td {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #eee;
         }
+        .receipt-total {
+            text-align: right;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            border-top: 2px solid #4a3b32 !important;
+            padding-top: 1rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 2rem;
+        }
+        .receipt-footer {
+            display: block !important;
+            text-align: center;
+            margin-top: 4rem;
+            font-style: italic;
+            color: #8c7a6e;
+            border-top: 1px solid #eee;
+            padding-top: 1.5rem;
+        }
+    }
+
+    .print-only {
+        display: none;
     }
 </style>
 
@@ -469,12 +548,22 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <span class="close-modal" onclick="closeModal()">&times;</span>
         
+        <!-- ENCABEZADO DE RECIBO (Solo para impresión) -->
+        <div class="receipt-header print-only">
+            <img src="{% static 'images/logo.png' %}" alt="Logo">
+            <h1>Obrador Artesano</h1>
+            <p>Calle de la Tradición, 12 - 28001 Madrid<br>
+            Tel: 912 345 678 | www.obradorartesano.com</p>
+        </div>
+
         <div class="modal-section" style="margin-bottom:1rem;">
-            <h3 style="text-align:center; border:none; margin-bottom:1rem; font-size:1.2rem;">Información del cliente</h3>
-            <div class="modal-grid">
+            <h3 style="text-align:center; border:none; margin-bottom:1rem; font-size:1.2rem;" class="screen-only">Información del cliente</h3>
+            <h2 class="print-only" style="text-align: center; margin-bottom: 1.5rem; font-family: 'Playfair Display', serif; color: #4a3b32;">RECIBO DE PEDIDO</h2>
+            
+            <div class="modal-grid receipt-info">
                 <div class="modal-field">
                     <label>Número de Pedido</label>
-                    <span id="modal-order-num"></span>
+                    <span id="modal-order-num" style="font-weight: bold; font-size: 1.1rem;"></span>
                 </div>
                 <div class="modal-field">
                     <label>Cliente</label>
@@ -492,18 +581,45 @@
                     <label>Recogida</label>
                     <span id="modal-pickup-day"></span>
                 </div>
+                <div class="modal-field print-only">
+                    <label>Fecha de Emisión</label>
+                    <span>{% now "d/m/Y" %}</span>
+                </div>
             </div>
         </div>
 
         <div class="modal-section">
-            <h3 style="text-align:center; border:none; font-size:1.1rem;">Resumen del pedido</h3>
-            <ul id="modal-products-list" class="modal-products-list">
+            <h3 style="text-align:center; border:none; font-size:1.1rem;" class="screen-only">Resumen del pedido</h3>
+            
+            <div class="print-only">
+                <table class="receipt-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">Cant.</th>
+                            <th style="width: 60%;">Producto</th>
+                            <th style="width: 15%; text-align: right;">Precio/u</th>
+                            <th style="width: 15%; text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-products-table-body">
+                        <!-- Se rellena con JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <ul id="modal-products-list" class="modal-products-list screen-only">
                 <!-- Se rellena con JS -->
             </ul>
-            <div class="modal-total">
+            <div class="modal-total receipt-total">
                 <span>Total</span>
                 <span id="modal-total-amt"></span>
             </div>
+        </div>
+
+        <!-- PIE DE RECIBO (Solo para impresión) -->
+        <div class="receipt-footer print-only">
+            <p>¡Gracias por confiar en nuestra panadería artesanal!</p>
+            <p style="font-size: 0.8rem; margin-top: 1rem;">Conserve este recibo para la recogida de su pedido.</p>
         </div>
 
         <div class="modal-actions">
@@ -571,11 +687,26 @@
             
             list.innerHTML += `<div style="font-size: 0.9rem; color: #4a3b32; font-weight: bold; margin-bottom: 0.3rem;">Precio Unitario</div>`;
             
+            // Tabla para impresión
+            const tableBody = document.getElementById('modal-products-table-body');
+            tableBody.innerHTML = '';
+
             productos.forEach(p => {
                 const li = document.createElement('li');
                 li.className = 'modal-product-item';
                 li.innerHTML = `<span>${p.cantidad}x ${p.nombre}</span><span>${p.precio} €</span>`;
                 list.appendChild(li);
+
+                // Fila de tabla para impresión
+                const tr = document.createElement('tr');
+                const subtotal = (parseFloat(p.cantidad) * parseFloat(p.precio.replace(',', '.'))).toFixed(2).replace('.', ',');
+                tr.innerHTML = `
+                    <td>${p.cantidad}</td>
+                    <td>${p.nombre}</td>
+                    <td style="text-align: right;">${p.precio} €</td>
+                    <td style="text-align: right; font-weight: bold;">${subtotal} €</td>
+                `;
+                tableBody.appendChild(tr);
             });
         } catch (e) {
             console.error("Error parsing products JSON:", e);
