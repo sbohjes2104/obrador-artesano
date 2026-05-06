@@ -58,10 +58,14 @@ WSGI_APPLICATION = 'obrador.wsgi.application'
 
 # Database
 # Use DATABASE_URL or MYSQL_URL for Railway/Production, default to local values
+# Also try individual Railway variables if URL is missing
+MYSQL_URL = os.environ.get('DATABASE_URL') or os.environ.get('MYSQL_URL')
+if not MYSQL_URL and os.environ.get('MYSQLHOST'):
+    MYSQL_URL = f"mysql://{os.environ.get('MYSQLUSER')}:{os.environ.get('MYSQLPASSWORD')}@{os.environ.get('MYSQLHOST')}:{os.environ.get('MYSQLPORT')}/{os.environ.get('MYSQLDATABASE')}"
+
 DATABASES = {
     'default': dj_database_url.config(
-        env='DATABASE_URL',
-        default=os.environ.get('MYSQL_URL', f"mysql://{os.environ.get('DB_USER', 'obrador_user')}:{os.environ.get('DB_PASSWORD', 'obrador_password')}@{os.environ.get('DB_HOST', '127.0.0.1')}:{os.environ.get('DB_PORT', '3306')}/{os.environ.get('DB_NAME', 'obrador_db')}")
+        default=MYSQL_URL or f"mysql://{os.environ.get('DB_USER', 'obrador_user')}:{os.environ.get('DB_PASSWORD', 'obrador_password')}@{os.environ.get('DB_HOST', '127.0.0.1')}:{os.environ.get('DB_PORT', '3306')}/{os.environ.get('DB_NAME', 'obrador_db')}"
     )
 }
 
