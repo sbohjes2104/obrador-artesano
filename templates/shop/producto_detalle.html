@@ -170,10 +170,43 @@
         font-size: 1.1rem;
         transition: color 0.3s ease;
     }
-    .btn-back:hover {
-        color: #c77b4d;
+    .btn-detalle:hover {
+        background-color: #b08159;
     }
     
+    .admin-detail-actions {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background-color: rgba(220, 179, 143, 0.2);
+        border-radius: 12px;
+        border: 1px solid #dcb38f;
+    }
+    
+    .btn-admin-detail {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: bold;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .btn-admin-edit {
+        background-color: #f0ad4e;
+        color: white;
+    }
+    
+    .btn-admin-delete {
+        background-color: #d9534f;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
     @media (max-width: 768px) {
         .product-detail-wrapper {
             padding: 2rem 1rem;
@@ -249,10 +282,24 @@
     </script>
     {% endif %}
     
-    <div style="max-width: 1000px; margin: 0 auto 2rem auto;">
+    <div style="max-width: 1000px; margin: 0 auto 2rem auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
         <a href="{% url 'shop:producto_list' %}" class="btn-back">
             <i class="fas fa-arrow-left"></i> Volver a la tienda
         </a>
+        
+        {% if user.is_staff %}
+        <div class="admin-detail-actions">
+            <a href="{% url 'shop:editar_producto' producto.id %}" class="btn-admin-detail btn-admin-edit">
+                <i class="fas fa-edit"></i> Editar Producto
+            </a>
+            <form action="{% url 'shop:eliminar_producto' producto.id %}" method="POST" style="margin: 0;" onsubmit="return confirm('¿Seguro que quieres eliminar este producto?')">
+                {% csrf_token %}
+                <button type="submit" class="btn-admin-detail btn-admin-delete">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </form>
+        </div>
+        {% endif %}
     </div>
     <div class="product-detail-container">
         <!-- Izquierda: Imagen y Alérgenos -->
@@ -288,28 +335,42 @@
         
         <!-- Derecha: Info del Producto -->
         <div class="product-detail-right">
-            <h1>{{ producto.nombre }}</h1>
-            <p class="product-detail-price">{{ producto.precio|floatformat:2 }} €</p>
-            
+            <div class="stock-status" style="margin-bottom: 0.5rem;">
+                {% if producto.stock > 0 %}
+                    <span style="color: #4a3b32; font-size: 0.9rem;">
+                        <i class="fas fa-check-circle" style="color: #28a745;"></i> 
+                        Disponibilidad: <strong>{{ producto.stock }} unidades</strong>
+                    </span>
+                {% else %}
+                    <span style="color: #d9534f; font-weight: bold; font-size: 1.1rem;">
+                        <i class="fas fa-times-circle"></i> Agotado temporalmente
+                    </span>
+                {% endif %}
+            </div>
+
             <form action="{% url 'shop:add_carrito' producto.id %}" method="POST">
                 {% csrf_token %}
-                <div class="quantity-selector">
+                <div class="quantity-selector" {% if producto.stock < 1 %}style="opacity: 0.5; pointer-events: none;"{% endif %}>
                     <label>Cantidad</label>
                     <div class="quantity-controls">
                         <button type="button" class="quantity-btn" onclick="document.getElementById('qty').stepDown()">-</button>
-                        <input type="number" id="qty" name="cantidad" class="quantity-input" value="1" min="1" max="50">
+                        <input type="number" id="qty" name="cantidad" class="quantity-input" value="1" min="1" max="{{ producto.stock }}" {% if producto.stock < 1 %}disabled{% endif %}>
                         <button type="button" class="quantity-btn" onclick="document.getElementById('qty').stepUp()">+</button>
                     </div>
                 </div>
                 
-                <div class="product-description">
+                <div class="product-description" style="margin-top: 1rem;">
                     {{ producto.descripcion }}
                     {% if not producto.descripcion %}
                     Elaborado con los mejores ingredientes para garantizar el mejor sabor en cada bocado.
                     {% endif %}
                 </div>
                 
-                <button type="submit" class="btn-add-cart">Añadir al carrito</button>
+                {% if producto.stock > 0 %}
+                    <button type="submit" class="btn-add-cart">Añadir al carrito</button>
+                {% else %}
+                    <button type="button" class="btn-add-cart" style="background-color: #ccc; cursor: not-allowed; color: #666;" disabled>Producto agotado</button>
+                {% endif %}
             </form>
         </div>
     </div>

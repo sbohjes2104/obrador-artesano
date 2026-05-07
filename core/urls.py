@@ -8,5 +8,7 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('registro/', views.register, name='register'),
     path('cuenta/', views.mi_cuenta, name='mi_cuenta'),
+    path('cuenta/pedido/<int:pedido_id>/editar/', views.editar_pedido_cuenta, name='editar_pedido_cuenta'),
+    path('cuenta/pedido/<int:pedido_id>/cancelar/', views.cancelar_pedido_cuenta, name='cancelar_pedido_cuenta'),
     path('contacto/', views.contacto, name='contacto'),
 ]

@@ -356,7 +356,7 @@
             errorBox.style.display = 'none';
 
             const texto     = document.getElementById('texto-resena').value.trim();
-            const puntuacion = parseInt(puntuacionInput.value);
+            const puntuacion = parseFloat(puntuacionInput.value);
 
             if (!texto) {
                 errorBox.textContent = 'Por favor, escribe un comentario antes de publicar.';
