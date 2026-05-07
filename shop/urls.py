@@ -16,6 +16,10 @@ urlpatterns = [
     # Admin Panel
     path('admin-panel/', views.administracion, name='administracion'),
     path('admin-panel/estado/<int:pedido_id>/', views.cambiar_estado_pedido, name='cambiar_estado'),
+    path('admin-panel/pedido/eliminar/<int:pedido_id>/', views.eliminar_pedido_admin, name='eliminar_pedido_admin'),
+    path('admin-panel/pedidos/eliminar-todos/', views.eliminar_todos_pedidos_admin, name='eliminar_todos_pedidos_admin'),
+    path('admin-panel/producto/editar/<int:pk>/', views.editar_producto, name='editar_producto'),
+    path('admin-panel/producto/eliminar/<int:pk>/', views.eliminar_producto, name='eliminar_producto'),
     
     # Checkout
     path('carrito/confirmar/', views.confirmar_reserva, name='confirmar_reserva'),

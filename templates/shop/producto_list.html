@@ -1,10 +1,99 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+<style>
+    /* Estilos de Administración en Tienda */
+    .shop-content {
+        position: relative;
+    }
+    
+    .btn-admin-add {
+        position: absolute;
+        top: 2rem;
+        right: 3rem;
+        background-color: #5a3d2b;
+        color: white !important;
+        padding: 0.7rem 1.3rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        z-index: 100;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        font-size: 0.95rem;
+        transition: transform 0.3s;
+    }
+    
+    .btn-admin-add:hover {
+        background-color: #432c1f;
+        transform: translateY(-2px);
+    }
+
+    /* Overlays de tarjetas */
+    .product-img-wrapper {
+        position: relative;
+    }
+    .product-admin-overlay {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        display: flex;
+        gap: 0.4rem;
+        z-index: 10;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .product-card:hover .product-admin-overlay {
+        opacity: 1;
+    }
+    .btn-card-admin {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-decoration: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        cursor: pointer;
+        border: none;
+        font-size: 0.75rem;
+    }
+    .btn-card-edit { background-color: #f0ad4e; }
+    .btn-card-delete { background-color: #d9534f; }
+
+    /* FORZAR SIEMPRE 4 COLUMNAS EN ESCRITORIO (Para recuperar la disposición original) */
+    @media (min-width: 768px) {
+        .products-grid,
+        .shop-container.sidebar-open .products-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 1.5rem !important;
+        }
+    }
+
+    @media (max-width: 991px) {
+        .btn-admin-add {
+            position: static;
+            margin: 1rem auto;
+            width: fit-content;
+        }
+    }
+    
+    @media (max-width: 767px) {
+        .product-admin-overlay { opacity: 1; } /* Siempre visible en móviles */
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <script>
     document.body.classList.add('shop-page');
 </script>
+
 <div class="shop-container">
     <aside class="shop-sidebar" id="filter-sidebar">
         <div class="sidebar-header">
@@ -30,13 +119,33 @@
         <button id="open-sidebar" class="sidebar-toggle-btn">
             <i class="fas fa-bars"></i>
         </button>
+
+        {% if user.is_staff %}
+            <a href="{% url 'shop:administracion' %}" class="btn-admin-add">
+                <i class="fas fa-plus"></i> Nuevo Producto
+            </a>
+        {% endif %}
+
         {% if category_selected %}
             <h1 class="section-title">{{ category_selected }}</h1>
             <div class="products-grid">
                 {% for producto in productos %}
-                <a href="{% url 'shop:producto_detalle' producto.id %}" style="text-decoration: none; color: inherit;">
-                <div class="product-card">
+                <div class="product-card" style="cursor: pointer;" data-url="{% url 'shop:producto_detalle' producto.id %}" onclick="if(!event.target.closest('.product-admin-overlay')){ window.location.href=this.dataset.url; }">
                     <div class="product-img-wrapper">
+                        {% if user.is_staff %}
+                        <div class="product-admin-overlay">
+                            <a href="{% url 'shop:editar_producto' producto.id %}" class="btn-card-admin btn-card-edit" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form action="{% url 'shop:eliminar_producto' producto.id %}" method="POST" style="margin: 0;" onsubmit="return confirm('¿Eliminar {{ producto.nombre|escapejs }}?')">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-card-admin btn-card-delete" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                        
                         {% if producto.imagen_url %}
                             <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="product-img">
                         {% elif producto.imagen %}
@@ -46,11 +155,10 @@
                         {% endif %}
                     </div>
                     <div class="product-info">
-                        <h3>{{ producto.nombre }}</h3>
-                        <p class="product-price">{{ producto.precio|floatformat:2 }} €</p>
+                        <h3 style="color: inherit; text-decoration: none;">{{ producto.nombre }}</h3>
+                        <p class="product-price">{{ producto.precio|floatformat:'2' }} €</p>
                     </div>
                 </div>
-                </a>
                 {% empty %}
                 <p>No hay productos disponibles en esta categoría.</p>
                 {% endfor %}
@@ -62,9 +170,22 @@
                 <h2 class="category-header">{{ section.categoria.nombre }}</h2>
                 <div class="products-grid">
                     {% for producto in section.productos %}
-                    <a href="{% url 'shop:producto_detalle' producto.id %}" style="text-decoration: none; color: inherit;">
-                    <div class="product-card">
+                    <div class="product-card" style="cursor: pointer;" data-url="{% url 'shop:producto_detalle' producto.id %}" onclick="if(!event.target.closest('.product-admin-overlay')){ window.location.href=this.dataset.url; }">
                         <div class="product-img-wrapper">
+                            {% if user.is_staff %}
+                            <div class="product-admin-overlay">
+                                <a href="{% url 'shop:editar_producto' producto.id %}" class="btn-card-admin btn-card-edit" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="{% url 'shop:eliminar_producto' producto.id %}" method="POST" style="margin: 0;" onsubmit="return confirm('¿Eliminar {{ producto.nombre|escapejs }}?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-card-admin btn-card-delete" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            {% endif %}
+    
                             {% if producto.imagen_url %}
                                 <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="product-img">
                             {% elif producto.imagen %}
@@ -74,11 +195,10 @@
                             {% endif %}
                         </div>
                         <div class="product-info">
-                            <h3>{{ producto.nombre }}</h3>
-                            <p class="product-price">{{ producto.precio|floatformat:2 }} €</p>
+                            <h3 style="color: inherit; text-decoration: none;">{{ producto.nombre }}</h3>
+                            <p class="product-price">{{ producto.precio|floatformat:'2' }} €</p>
                         </div>
                     </div>
-                    </a>
                     {% endfor %}
                 </div>
             </section>

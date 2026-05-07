@@ -8,6 +8,9 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import Producto, Categoria, Alergeno, Pedido, LineaPedido, Reseña
 from .cart import Carrito
+from .forms import ProductoForm
+from django.utils import timezone
+
 
 def producto_list(request):
     category_name = request.GET.get('category')
@@ -55,6 +58,10 @@ def add_carrito(request, producto_id):
     except ValueError:
         cantidad = 1
         
+    if cantidad > producto.stock:
+        messages.error(request, f'Lo sentimos, solo quedan {producto.stock} unidades de {producto.nombre}.')
+        return redirect('shop:producto_detalle', producto_id=producto_id)
+        
     carrito.agregar(producto=producto, cantidad=cantidad)
     messages.success(request, f'✓ {producto.nombre} añadido al carrito')
     return redirect('shop:producto_detalle', producto_id=producto_id)
@@ -98,6 +105,9 @@ def confirmar_reserva(request):
                 cantidad=item['cantidad'],
                 precio_unidad=item['precio']
             )
+            # Descontar stock
+            producto.stock -= item['cantidad']
+            producto.save()
         
         # Vaciar el carrito
         carrito.limpiar()
@@ -115,33 +125,92 @@ def pedido_confirmado(request, pedido_id):
 
 @staff_member_required
 def administracion(request):
+    # Formulario para nuevo producto
+    if request.method == 'POST' and 'crear_producto' in request.POST:
+        form = ProductoForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '¡Producto creado con éxito!')
+            return redirect('shop:administracion')
+    else:
+        form = ProductoForm()
+
     # Todos los pedidos
     pedidos = Pedido.objects.all().order_by('-fecha')
     
-    # Resumen de Producción: sumar cantidades de productos en estados PENDIENTE o PREPARANDO
-    pedidos_pendientes = Pedido.objects.filter(estado__in=['PENDIENTE', 'PREPARANDO'])
-    produccion = {}
+    # Resumen de Producción por días
+    dias_semana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+    produccion_por_dia = {dia: {} for dia in dias_semana}
+    
+    pedidos_pendientes = Pedido.objects.filter(estado__in=['PENDIENTE', 'PREPARANDO']).prefetch_related('lineas__producto')
     
     for pedido in pedidos_pendientes:
+        dia_str = pedido.dia_recogida or "Hoy"
+        # Normalizar día
+        if "Lunes" in dia_str: dia_key = "Lunes"
+        elif "Martes" in dia_str: dia_key = "Martes"
+        elif "Miércoles" in dia_str: dia_key = "Miércoles"
+        elif "Jueves" in dia_str: dia_key = "Jueves"
+        elif "Viernes" in dia_str: dia_key = "Viernes"
+        elif "Sábado" in dia_str: dia_key = "Sábado"
+        elif "Domingo" in dia_str: dia_key = "Domingo"
+        else:
+            # Si es "Hoy" o algo no reconocido, usar el día actual
+            hoy_idx = timezone.now().weekday() # 0 es Lunes
+            dia_key = dias_semana[hoy_idx]
+            
         for linea in pedido.lineas.all():
             nombre = linea.producto.nombre if linea.producto else "Producto eliminado"
-            if nombre in produccion:
-                produccion[nombre] += linea.cantidad
+            if nombre in produccion_por_dia[dia_key]:
+                produccion_por_dia[dia_key][nombre] += linea.cantidad
             else:
-                produccion[nombre] = linea.cantidad
+                produccion_por_dia[dia_key][nombre] = linea.cantidad
                 
-    # Armar string de resumen "Total para hoy: 1 Pan integral, 2 Pan de centeno..."
-    resumen_lista = [f"{cantidad} {nombre}" for nombre, cantidad in produccion.items()]
-    resumen_texto = ", ".join(resumen_lista) if resumen_lista else "No hay producción pendiente"
-    resumen_texto = f"Total para hoy: {resumen_texto}"
+    hoy_idx = timezone.now().weekday()
+    dia_actual = dias_semana[hoy_idx]
+                
+    resumen_lineas = []
+    for dia in dias_semana:
+        if produccion_por_dia[dia]:
+            label = f"Hoy ({dia})" if dia == dia_actual else dia
+            items = [f"{cant} {nom}" for nom, cant in produccion_por_dia[dia].items()]
+            resumen_lineas.append(f"<strong>{label}:</strong> " + ", ".join(items))
+            
+    resumen_texto = "<br>".join(resumen_lineas) if resumen_lineas else "No hay producción pendiente"
+
     
     estados = Pedido.ESTADOS
     
     return render(request, 'shop/administracion.html', {
         'pedidos': pedidos,
         'resumen_texto': resumen_texto,
-        'estados': estados
+        'estados': estados,
+        'form': form,
+        'productos': Producto.objects.all().order_by('categoria', 'nombre')
     })
+
+@staff_member_required
+def editar_producto(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+    if request.method == 'POST':
+        form = ProductoForm(request.POST, request.FILES, instance=producto)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Producto "{producto.nombre}" actualizado correctamente.')
+            return redirect('shop:administracion')
+    else:
+        form = ProductoForm(instance=producto)
+    
+    return render(request, 'shop/editar_producto.html', {'form': form, 'producto': producto})
+
+@staff_member_required
+def eliminar_producto(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+    if request.method == 'POST':
+        nombre = producto.nombre
+        producto.delete()
+        messages.success(request, f'Producto "{nombre}" eliminado del catálogo.')
+    return redirect('shop:administracion')
 
 @staff_member_required
 def cambiar_estado_pedido(request, pedido_id):
@@ -155,6 +224,23 @@ def cambiar_estado_pedido(request, pedido_id):
             pedido.estado = nuevo_estado
             pedido.save()
             
+    return redirect('shop:administracion')
+
+
+@require_POST
+def eliminar_pedido_admin(request, pedido_id):
+    if request.user.is_staff:
+        pedido = get_object_or_404(Pedido, id=pedido_id)
+        pedido.delete()
+        messages.success(request, f'Pedido #{pedido.id} eliminado del historial.')
+    return redirect('shop:administracion')
+
+
+@require_POST
+def eliminar_todos_pedidos_admin(request):
+    if request.user.is_staff:
+        Pedido.objects.all().delete()
+        messages.success(request, 'Todo el historial de pedidos ha sido eliminado.')
     return redirect('shop:administracion')
 
 

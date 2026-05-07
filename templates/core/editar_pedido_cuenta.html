@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .edit-pedido-wrapper {
+        min-height: calc(100vh - 150px);
+        background-color: #f6f5e9;
+        padding: 4rem 2rem;
+    }
+    .edit-pedido-container {
+        background: #fff;
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        color: #4a3b32;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    .auth-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        color: #4a3b32;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    .auth-subtitle {
+        text-align: center;
+        margin-bottom: 2rem;
+        color: #666;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        font-family: 'Inter', sans-serif;
+    }
+    .form-group input, 
+    .form-group select {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+    }
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        background-color: #4a3b32;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-family: 'Inter', sans-serif;
+    }
+    .btn-submit:hover {
+        background-color: #3a2e27;
+    }
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #4a3b32;
+        text-decoration: none;
+    }
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="edit-pedido-wrapper">
+    <div class="edit-pedido-container">
+        <h1 class="auth-title">Editar Pedido #{{ pedido.id|stringformat:"03d" }}</h1>
+        <p class="auth-subtitle">Modifica el día de recogida de tu pedido.</p>
+        
+        <form method="POST" action="{% url 'editar_pedido_cuenta' pedido.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="dia_recogida">Día de Recogida</label>
+                <select name="dia_recogida" id="dia_recogida" required>
+                    <!-- Wait, if we rewrite value in JS, we shouldn't change the actual HTML value parameter, because the backend relies on 'Lunes' to know what day it is. Actually the backend saves whatever string is sent. If it sends 'Lunes (07/05)' the backend saves exactly 'Lunes (07/05)'. -->
+                    <!-- Because our DB is just a CharField, anything goes! -->
+                    <!-- I'll add data-day to use in JS -->
+                    <option value="Hoy" data-day="Hoy" {% if "Hoy" in pedido.dia_recogida %}selected{% endif %}>Hoy</option>
+                    <option value="Lunes" data-day="Lunes" {% if "Lunes" in pedido.dia_recogida %}selected{% endif %}>Lunes</option>
+                    <option value="Martes" data-day="Martes" {% if "Martes" in pedido.dia_recogida %}selected{% endif %}>Martes</option>
+                    <option value="Miércoles" data-day="Miércoles" {% if "Miércoles" in pedido.dia_recogida %}selected{% endif %}>Miércoles</option>
+                    <option value="Jueves" data-day="Jueves" {% if "Jueves" in pedido.dia_recogida %}selected{% endif %}>Jueves</option>
+                    <option value="Viernes" data-day="Viernes" {% if "Viernes" in pedido.dia_recogida %}selected{% endif %}>Viernes</option>
+                    <option value="Sábado" data-day="Sábado" {% if "Sábado" in pedido.dia_recogida %}selected{% endif %}>Sábado</option>
+                    <option value="Domingo" data-day="Domingo" {% if "Domingo" in pedido.dia_recogida %}selected{% endif %}>Domingo</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-submit">Guardar Cambios</button>
+            <a href="{% url 'mi_cuenta' %}" class="back-link"><i class="fas fa-arrow-left"></i> Volver a Mi Cuenta</a>
+        </form>
+    </div>
+</div>
+
+<script>
+(function() {
+    const select = document.getElementById('dia_recogida');
+    if (!select) return;
+
+    const daysMap = {
+        'Domingo': 0, 'Lunes': 1, 'Martes': 2, 'Miércoles': 3, 
+        'Jueves': 4, 'Viernes': 5, 'Sábado': 6
+    };
+
+    const today = new Date();
+    const options = select.querySelectorAll('option');
+    
+    options.forEach(option => {
+        const dayName = option.getAttribute('data-day');
+        if (dayName === 'Hoy') {
+            return; // keep "Hoy" 
+        }
+
+        const targetDay = daysMap[dayName];
+        if (targetDay !== undefined) {
+            let daysDiff = targetDay - today.getDay();
+            if (daysDiff <= 0) daysDiff += 7;
+
+            const targetDate = new Date(today);
+            targetDate.setDate(today.getDate() + daysDiff);
+
+            const day = String(targetDate.getDate()).padStart(2, '0');
+            const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+            const dateStr = `${day}/${month}`;
+            const fullValue = `${dayName} (${dateStr})`;
+
+            option.textContent = fullValue;
+            option.value = fullValue;
+        }
+    });
+})();
+</script>
+{% endblock %}

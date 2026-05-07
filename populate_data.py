@@ -70,51 +70,53 @@ def populate():
         "batido": "/static/productos/batido.jpg",
     }
 
+    generic_desc = "Elaborado con los mejores ingredientes para garantizar el mejor sabor en cada bocado."
+    
     products_data = [
         # (Nombre, Precio, Categoría, URL, Descripción, Lista_Alérgenos)
-        ("Pan blanco", 2.00, "Panadería Tradicional", images["pan_blanco"], "", ["Gluten"]),
+        ("Pan blanco", 2.00, "Panadería Tradicional", images["pan_blanco"], generic_desc, ["Gluten"]),
         ("Pan integral", 2.20, "Panadería Tradicional", images["pan_integral"], "El pan integral se elabora con harina que aprovecha el grano entero...", ["Gluten"]),
-        ("Pan de centeno", 3.00, "Panadería Tradicional", images["pan_centeno"], "", ["Gluten"]),
-        ("Pan de masa madre", 3.50, "Panadería Tradicional", images["pan_masa_madre"], "", ["Gluten"]),
-        ("Pan multicereal", 2.30, "Panadería Tradicional", images["pan_multicereal"], "", ["Gluten"]),
-        ("Baguette", 0.80, "Panadería Tradicional", images["baguette"], "", ["Gluten"]),
+        ("Pan de centeno", 3.00, "Panadería Tradicional", images["pan_centeno"], generic_desc, ["Gluten"]),
+        ("Pan de masa madre", 3.50, "Panadería Tradicional", images["pan_masa_madre"], generic_desc, ["Gluten"]),
+        ("Pan multicereal", 2.30, "Panadería Tradicional", images["pan_multicereal"], generic_desc, ["Gluten"]),
+        ("Baguette", 0.80, "Panadería Tradicional", images["baguette"], generic_desc, ["Gluten"]),
         
-        ("Pan de espelta", 3.50, "Panes Especiales / Saludables", images["pan_centeno"], "", ["Gluten"]),
-        ("Pan de sésamo", 2.80, "Panes Especiales / Saludables", images["pan_sesamo"], "", ["Gluten", "Frutos Secos"]),
-        ("Pan de semillas", 3.20, "Panes Especiales / Saludables", images["pan_semillas"], "", ["Gluten", "Frutos Secos"]),
-        ("Pan de avena", 3.00, "Panes Especiales / Saludables", images["pan_avena"], "", ["Gluten"]),
-        ("Pan de espinacas", 3.80, "Panes Especiales / Saludables", images["pan_espinacas"], "", ["Gluten"]),
+        ("Pan de espelta", 3.50, "Panes Especiales / Saludables", images["pan_centeno"], generic_desc, ["Gluten"]),
+        ("Pan de sésamo", 2.80, "Panes Especiales / Saludables", images["pan_sesamo"], generic_desc, ["Gluten", "Frutos Secos"]),
+        ("Pan de semillas", 3.20, "Panes Especiales / Saludables", images["pan_semillas"], generic_desc, ["Gluten", "Frutos Secos"]),
+        ("Pan de avena", 3.00, "Panes Especiales / Saludables", images["pan_avena"], generic_desc, ["Gluten"]),
+        ("Pan de espinacas", 3.80, "Panes Especiales / Saludables", images["pan_espinacas"], generic_desc, ["Gluten"]),
         
-        ("Croissant", 1.50, "Bollería Dulce", images["croissant"], "", ["Gluten", "Lácteos", "Huevos"]),
-        ("Napolitana de chocolate", 1.80, "Bollería Dulce", images["napolitana"], "", ["Gluten", "Lácteos", "Huevos"]),
-        ("Caracola de pasas", 1.70, "Bollería Dulce", images["caracola"], "", ["Gluten", "Lácteos", "Huevos"]),
-        ("Palmera de hojaldre", 2.00, "Bollería Dulce", images["palmera"], "", ["Gluten", "Lácteos"]),
-        ("Ensaimada", 2.20, "Bollería Dulce", images["ensaimada"], "", ["Gluten", "Lácteos", "Huevos"]),
+        ("Croissant", 1.50, "Bollería Dulce", images["croissant"], generic_desc, ["Gluten", "Lácteos", "Huevos"]),
+        ("Napolitana de chocolate", 1.80, "Bollería Dulce", images["napolitana"], generic_desc, ["Gluten", "Lácteos", "Huevos"]),
+        ("Caracola de pasas", 1.70, "Bollería Dulce", images["caracola"], generic_desc, ["Gluten", "Lácteos", "Huevos"]),
+        ("Palmera de hojaldre", 2.00, "Bollería Dulce", images["palmera"], generic_desc, ["Gluten", "Lácteos"]),
+        ("Ensaimada", 2.20, "Bollería Dulce", images["ensaimada"], generic_desc, ["Gluten", "Lácteos", "Huevos"]),
         
-        ("Tarta de queso", 15.00, "Pastelería y Tartas", images["tarta_queso"], "", ["Gluten", "Lácteos", "Huevos"]),
-        ("Tarta de manzana", 12.00, "Pastelería y Tartas", images["tarta_manzana"], "", ["Gluten", "Lácteos", "Huevos"]),
-        ("Tarta de chocolate", 18.00, "Pastelería y Tartas", images["tarta_chocolate"], "", ["Gluten", "Lácteos", "Huevos", "Frutos Secos"]),
-        ("Tarta Red Velvet", 20.00, "Pastelería y Tartas", images["red_velvet"], "", ["Gluten", "Lácteos", "Huevos"]),
-        ("Tarta de zanahoria", 16.00, "Pastelería y Tartas", images["tarta_zanahoria"], "", ["Gluten", "Lácteos", "Huevos", "Frutos Secos"]),
+        ("Tarta de queso", 15.00, "Pastelería y Tartas", images["tarta_queso"], generic_desc, ["Gluten", "Lácteos", "Huevos"]),
+        ("Tarta de manzana", 12.00, "Pastelería y Tartas", images["tarta_manzana"], generic_desc, ["Gluten", "Lácteos", "Huevos"]),
+        ("Tarta de chocolate", 18.00, "Pastelería y Tartas", images["tarta_chocolate"], generic_desc, ["Gluten", "Lácteos", "Huevos", "Frutos Secos"]),
+        ("Tarta Red Velvet", 20.00, "Pastelería y Tartas", images["red_velvet"], generic_desc, ["Gluten", "Lácteos", "Huevos"]),
+        ("Tarta de zanahoria", 16.00, "Pastelería y Tartas", images["tarta_zanahoria"], generic_desc, ["Gluten", "Lácteos", "Huevos", "Frutos Secos"]),
         
-        ("Empanada de atún", 12.00, "Salados", images["empanada"], "", ["Gluten", "Huevos"]),
-        ("Empanadilla de carne", 1.50, "Salados", images["empanadilla"], "", ["Gluten", "Huevos"]),
-        ("Quiche de jamón y queso", 4.50, "Salados", images["quiche"], "", ["Gluten", "Lácteos", "Huevos"]),
+        ("Empanada de atún", 12.00, "Salados", images["empanada"], generic_desc, ["Gluten", "Huevos"]),
+        ("Empanadilla de carne", 1.50, "Salados", images["empanadilla"], generic_desc, ["Gluten", "Huevos"]),
+        ("Quiche de jamón y queso", 4.50, "Salados", images["quiche"], generic_desc, ["Gluten", "Lácteos", "Huevos"]),
         ("Croquetas de la casa", 6.00, "Salados", images["croquetas"], "Deliciosas croquetas caseras recién hechas.", ["Gluten", "Lácteos", "Huevos"]),
         ("Surtido de Saladitos", 1.20, "Salados", images["saladitos_surtidos"], "Variedad de bocaditost de hojaldre salado.", ["Gluten"]),
         
-        ("Zumo de naranja", 2.50, "Bebidas y Complementos", images["zumo_naranja"], "", []),
-        ("Café con leche", 1.80, "Bebidas y Complementos", images["cafe"], "", ["Lácteos"]),
-        ("Infusión de manzanilla", 1.50, "Bebidas y Complementos", images["infusion"], "", []),
-        ("Agua mineral", 1.00, "Bebidas y Complementos", images["agua"], "", []),
-        ("Batido de chocolate", 2.50, "Bebidas y Complementos", images["batido"], "", ["Lácteos"]),
+        ("Zumo de naranja", 2.50, "Bebidas y Complementos", images["zumo_naranja"], generic_desc, []),
+        ("Café con leche", 1.80, "Bebidas y Complementos", images["cafe"], generic_desc, ["Lácteos"]),
+        ("Infusión de manzanilla", 1.50, "Bebidas y Complementos", images["infusion"], generic_desc, []),
+        ("Agua mineral", 1.00, "Bebidas y Complementos", images["agua"], generic_desc, []),
+        ("Batido de chocolate", 2.50, "Bebidas y Complementos", images["batido"], generic_desc, ["Lácteos"]),
     ]
 
     for nombre, precio, cat_name, url, desc, alergs in products_data:
         cat = Categoria.objects.get(nombre=cat_name)
         p, created = Producto.objects.update_or_create(
             nombre=nombre,
-            defaults={'precio': precio, 'categoria': cat, 'stock': 10, 'imagen_url': url, 'descripcion': desc}
+            defaults={'precio': precio, 'categoria': cat, 'stock': 5, 'imagen_url': url, 'descripcion': desc}
         )
         
         # Update allergens
