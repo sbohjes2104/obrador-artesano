@@ -63,10 +63,10 @@ Para poner en marcha el proyecto en un entorno local, sigue estos pasos:
    ```
 
 3. **Configurar Variables de Entorno**:
-   Asegúrate de configurar las variables de correo en tu entorno (Docker `.env` o variables de Railway):
-   - `EMAIL_HOST_USER`: Correo de Gmail.
-   - `EMAIL_HOST_PASSWORD`: Contraseña de aplicación de Google.
-   - `EMAIL_PORT`: 465 (Recomendado SSL).
+   Asegúrate de configurar las variables en tu entorno (Docker `.env` o variables de Railway):
+   - `RESEND_API_KEY`: Tu API Key de Resend (para el envío de correos).
+   - `CONTACT_EMAIL`: El correo que recibirá las notificaciones.
+   - `RESEND_FROM_EMAIL`: El remitente (por defecto `onboarding@resend.dev`).
 
 4. **Ejecutar migraciones**:
    ```bash

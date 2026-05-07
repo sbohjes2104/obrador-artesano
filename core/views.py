@@ -103,19 +103,35 @@ def contacto(request):
         
         cuerpo = f"Nombre: {nombre}\nCorreo: {email}\nAsunto: {asunto}\n\nMensaje:\n{mensaje}"
         
+        import requests
+        headers = {
+            "Authorization": f"Bearer {settings.RESEND_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "from": settings.RESEND_FROM_EMAIL,
+            "to": [settings.CONTACT_EMAIL],
+            "subject": f"Nuevo mensaje de contacto: {asunto}",
+            "html": f"""
+                <h3>Nuevo mensaje recibido</h3>
+                <p><strong>De:</strong> {nombre} ({email})</p>
+                <p><strong>Asunto:</strong> {asunto}</p>
+                <p><strong>Mensaje:</strong></p>
+                <p>{mensaje}</p>
+            """
+        }
+        
         try:
-            send_mail(
-                subject=f"Nuevo mensaje de contacto: {asunto}",
-                message=cuerpo,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[settings.CONTACT_EMAIL],
-                fail_silently=False,
-            )
-            # Actualizar el tiempo del último envío
-            request.session['contacto_last_submit'] = ahora
-            messages.success(request, '¡Tu mensaje ha sido enviado correctamente! Te responderemos lo antes posible.')
+            response = requests.post("https://api.resend.com/emails", json=payload, headers=headers)
+            if response.status_code in [200, 201, 202]:
+                # Actualizar el tiempo del último envío
+                request.session['contacto_last_submit'] = ahora
+                messages.success(request, '¡Tu mensaje ha sido enviado correctamente! Te responderemos lo antes posible.')
+            else:
+                error_msg = response.json().get('message', 'Error desconocido')
+                messages.error(request, f'Error al enviar mensaje via API: {error_msg}')
         except Exception as e:
-            messages.error(request, f'Error al enviar mensaje: {str(e)}')
+            messages.error(request, f'Error crítico de conexión: {str(e)}')
             
         return redirect('contacto')
     return render(request, 'core/contacto.html')

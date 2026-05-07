@@ -1,14 +1,6 @@
 import os
 import dj_database_url
-import socket
 from pathlib import Path
-
-# Parche para Railway: Forzar IPv4 para evitar errores de red (Errno 101)
-orig_getaddrinfo = socket.getaddrinfo
-def patched_getaddrinfo(*args, **kwargs):
-    responses = orig_getaddrinfo(*args, **kwargs)
-    return [res for res in responses if res[0] == socket.AF_INET]
-socket.getaddrinfo = patched_getaddrinfo
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -139,6 +131,8 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 # Correo que recibe los mensajes de contacto
 CONTACT_EMAIL = os.environ.get('CONTACT_EMAIL', EMAIL_HOST_USER)
 
-# Tiempo de espera para la conexión (evita cuelgues en Railway)
-EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', 10))
+# Configuración de Resend (Alternativa a SMTP para Railway)
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', 're_eWcF81HT_2hJhjYrjqNMQYRyebozY9CB1')
+# El remitente debe ser onboarding@resend.dev si no tienes dominio propio configurado en Resend
+RESEND_FROM_EMAIL = 'Artesanía en cada bocado <onboarding@resend.dev>'
 
