@@ -128,9 +128,10 @@ def contacto(request):
                 request.session['contacto_last_submit'] = ahora
                 messages.success(request, '¡Tu mensaje ha sido enviado correctamente! Te responderemos lo antes posible.')
             else:
-                messages.error(request, 'Hubo un error al enviar tu mensaje. Por favor, inténtalo de nuevo más tarde.')
-        except Exception:
-            messages.error(request, 'Hubo un error al enviar tu mensaje. Por favor, inténtalo de nuevo más tarde.')
+                error_msg = response.json().get('message', 'Error desconocido')
+                messages.error(request, f'Error al enviar mensaje via API: {error_msg}')
+        except Exception as e:
+            messages.error(request, f'Error crítico de conexión: {str(e)}')
             
         return redirect('contacto')
     return render(request, 'core/contacto.html')
