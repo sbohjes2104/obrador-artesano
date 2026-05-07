@@ -1,6 +1,14 @@
 import os
 import dj_database_url
+import socket
 from pathlib import Path
+
+# Parche para Railway: Forzar IPv4 para evitar errores de red (Errno 101)
+orig_getaddrinfo = socket.getaddrinfo
+def patched_getaddrinfo(*args, **kwargs):
+    responses = orig_getaddrinfo(*args, **kwargs)
+    return [res for res in responses if res[0] == socket.AF_INET]
+socket.getaddrinfo = patched_getaddrinfo
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -118,7 +126,7 @@ AUTHENTICATION_BACKENDS = [
 
 # Configuración de Correo Electrónico
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.googlemail.com')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 465))
 # Si el puerto es 465, solemos usar SSL. Si es 587, usamos TLS.
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False' if EMAIL_PORT == 465 else 'True').lower() == 'true'
