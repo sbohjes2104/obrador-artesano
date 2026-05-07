@@ -15,6 +15,9 @@ La solución propuesta es una aplicación web que permite conectar la empresa co
 - **Gestión de Stock en Tiempo Real**: Control administrativo de existencias para evitar ventas sin stock físico.
 - **Sistema de Usuarios y Autenticación**: Registro e inicio de sesión seguro para clientes y administradores.
 - **Reserva de Pedidos (Click & Collect)**: Los usuarios pueden realizar su pedido online y recogerlo en el obrador físico.
+- **Sistema de Notificaciones por Email**: Envío de correos automáticos desde el formulario de contacto para una comunicación fluida.
+- **Seguridad Anti-Spam**: Implementación de sistema de "cooldown" para prevenir el spam en formularios.
+- **Administración Avanzada**: Panel de control con resumen de producción semanal, edición de productos y generación de recibos PDF personalizados.
 - **Diseño Mobile-First**: Interfaz optimizada para su uso en dispositivos móviles, ofreciendo una experiencia elegante y profesional.
 
 ## 🛠️ Tecnologías Utilizadas
@@ -59,19 +62,25 @@ Para poner en marcha el proyecto en un entorno local, sigue estos pasos:
    docker-compose up --build -d
    ```
 
-3. **Ejecutar migraciones**:
+3. **Configurar Variables de Entorno**:
+   Asegúrate de configurar las variables de correo en tu entorno (Docker `.env` o variables de Railway):
+   - `EMAIL_HOST_USER`: Correo de Gmail.
+   - `EMAIL_HOST_PASSWORD`: Contraseña de aplicación de Google.
+   - `EMAIL_PORT`: 465 (Recomendado SSL).
+
+4. **Ejecutar migraciones**:
    ```bash
    docker-compose run web python manage.py migrate
    ```
 
-4. **Crear usuario administrador**:
+5. **Crear usuario administrador**:
    ```bash
    docker-compose run web python manage.py createsuperuser
    ```
 
-5. **Acceder a la aplicación**:
+6. **Acceder a la aplicación**:
    - Web: `http://localhost:8000`
-   - Admin: `http://localhost:8000/admin`
+   - Admin: `http://localhost:8000/shop/administracion`
 
 ---
 
