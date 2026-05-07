@@ -114,8 +114,8 @@ def contacto(request):
             # Actualizar el tiempo del último envío
             request.session['contacto_last_submit'] = ahora
             messages.success(request, '¡Tu mensaje ha sido enviado correctamente! Te responderemos lo antes posible.')
-        except Exception:
-            messages.error(request, 'Hubo un error al enviar tu mensaje. Por favor, inténtalo de nuevo más tarde.')
+        except Exception as e:
+            messages.error(request, f'Error al enviar mensaje: {str(e)}')
             
         return redirect('contacto')
     return render(request, 'core/contacto.html')
