@@ -26,10 +26,9 @@ services:
       - DB_PASSWORD=obrador_password
       - DB_HOST=db
       - DB_PORT=3306
-      - EMAIL_HOST_USER=sbohjes2104@g.educaand.es
-      - EMAIL_HOST_PASSWORD=kpiflwpfuixidksz
-      - CONTACT_EMAIL=sbohjes2104@g.educaand.es
-      - EMAIL_PORT=465
+      - CONTACT_EMAIL=sbohjes2104@fp.iesromerovargas.com
+      - RESEND_API_KEY=re_eWcF81HT_2hJhjYrjqNMQYRyebozY9CB1
+      - RESEND_FROM_EMAIL=Artesanía en cada bocado <onboarding@resend.dev>
 
     depends_on:
       - db
