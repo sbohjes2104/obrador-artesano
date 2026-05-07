@@ -119,8 +119,10 @@ AUTHENTICATION_BACKENDS = [
 # Configuración de Correo Electrónico
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 465))
+# Si el puerto es 465, solemos usar SSL. Si es 587, usamos TLS.
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False' if EMAIL_PORT == 465 else 'True').lower() == 'true'
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'True' if EMAIL_PORT == 465 else 'False').lower() == 'true'
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
